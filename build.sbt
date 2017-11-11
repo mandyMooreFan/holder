@@ -1,3 +1,7 @@
+import scala.sys.process._
+
+organization := "com.github.mfoody"
+
 name := "akka-boot-starter"
 
 version := "0.1"
@@ -11,7 +15,7 @@ val akkaHttpVersion = "10.0.10"
 val akkaVersion = "2.5.6"
 
 libraryDependencies ++= Seq(
-  "com.github.mfoody.akkaboot" %% "akka-boot" % "0.2-SNAPSHOT",
+  "com.github.mfoody" %% "akka-boot" % "0.2-SNAPSHOT",
 
   // Test
   "org.scalatest" %% "scalatest" % "3.0.4" % Test,
