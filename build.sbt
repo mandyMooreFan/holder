@@ -16,6 +16,7 @@ val akkaVersion = "2.5.6"
 
 libraryDependencies ++= Seq(
   "com.github.mfoody" %% "akka-boot" % "0.2-SNAPSHOT",
+  "io.sentry" % "sentry-logback" % "1.6.3",
 
   // Test
   "org.scalatest" %% "scalatest" % "3.0.4" % Test,

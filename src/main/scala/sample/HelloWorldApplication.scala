@@ -1,6 +1,7 @@
 package sample
 
 import com.mfoody.akkaboot.{Application, Environment}
+import io.sentry.Sentry
 
 object HelloWorldApplication {
 
@@ -12,6 +13,8 @@ object HelloWorldApplication {
 
 class HelloWorldApplication(args: Array[String]) extends Application[HelloWorldConfiguration](args) {
   override def run(configuration: HelloWorldConfiguration, environment: Environment): Environment = {
+    Sentry.init(configuration.sentry.baseDsn)
+
     environment.route(new HelloWorldRoutes(environment.system, environment.apiDispatcher))
   }
 }

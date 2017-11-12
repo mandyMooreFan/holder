@@ -5,6 +5,7 @@ import akka.http.scaladsl.server.Route
 import com.mfoody.akkaboot.ScalaRouteBuilder
 
 import scala.concurrent.ExecutionContext
+import scala.util.Random
 
 class HelloWorldRoutes(system: ActorSystem, executionContext: ExecutionContext)
   extends ScalaRouteBuilder(system, executionContext) {
@@ -12,7 +13,11 @@ class HelloWorldRoutes(system: ActorSystem, executionContext: ExecutionContext)
   override def route: Route = get {
     pathPrefix("hellos") {
       completeWithActor {
-        "Hello World"
+        if (Random.nextBoolean()) {
+          throw new Exception("Something bad happened")
+        } else {
+          "Hello World"
+        }
       }
     }
   }
