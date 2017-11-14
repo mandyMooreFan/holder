@@ -31,3 +31,11 @@ docker := {
 
   "docker build -t akka-boot-starter ."!
 }
+
+lazy val dockerRun = taskKey[Unit]("Run docker image in development")
+
+dockerRun := {
+  docker.value
+
+  "docker run -d --name akka-boot -e environment=development --link loggly-docker:loggly -p 80:80 81:81 443:443 444:444 -t akka-boot-starter"!
+}

@@ -17,16 +17,17 @@ object SentryConfiguration {
     val environment = config.getString("environment")
     val servername = InetAddress.getLocalHost.getHostName
     val async = config.getBoolean("async")
-    SentryConfiguration(dsn, sampleRate, environment, servername, async)
+    val packages = config.getString("packages")
+    SentryConfiguration(dsn, sampleRate, environment, servername, async, packages)
   }
 
 }
 
 case class SentryConfiguration(baseDsn: String, sampleRate: Double, environment: String, servername: String,
-                               async: Boolean) {
+                               async: Boolean, packages: String) {
 
   def dsn: String = {
-    s"$baseDsn?sample.rate=$sampleRate&environment=$environment&servername=$servername&async=$async"
+    s"$baseDsn?sample.rate=$sampleRate&environment=$environment&servername=$servername&async=$async&stacktrace.app.packages=$packages"
   }
 
 }

@@ -14,12 +14,22 @@
         </filter>
     </appender>
 
+    <appender name="Syslog" class="ch.qos.logback.classic.net.SyslogAppender">
+        <syslogHost>loggly</syslogHost>
+        <port>514</port>
+        <facility>AUTH</facility>
+        <suffixPattern>[%thread] %logger %msg</suffixPattern>
+        <stackTracePattern>\t</stackTracePattern>
+        <throwableExcluded>false</throwableExcluded>
+    </appender>
+
     <logger name="akka" level="INFO"/>
     <logger name="com.typesafe" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="Console"/>
         <appender-ref ref="Sentry"/>
+        <appender-ref ref="Syslog"/>
     </root>
 
 </configuration>
