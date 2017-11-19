@@ -1,8 +1,6 @@
 <configuration>
 
     <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
-        <!-- encoders are assigned the type
-             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
@@ -14,12 +12,29 @@
         </filter>
     </appender>
 
+    <appender name="Syslog" class="ch.qos.logback.classic.net.SyslogAppender">
+        <syslogHost>loggly</syslogHost>
+        <port>514</port>
+        <facility>SYSLOG</facility>
+        <suffixPattern>java %d{ISO8601,UTC} %p %t %c %M - %m %xException</suffixPattern>
+        <throwableExcluded>true</throwableExcluded>
+    </appender>
+
+    <!-- This appender is really only for testing. It's a synchronous, non-batching appender so performance stinks. -->
+    <!-- To use it replace LOGGLY_AUTHENTICATION_TOKEN with your Loggly Source Token -->
+    <!--<appender name="Loggly" class="ch.qos.logback.ext.loggly.LogglyAppender">-->
+        <!--<endpointUrl>https://logs-01.loggly.com/inputs/LOGGLY_AUTHENTICATION_TOKEN/tag/logback</endpointUrl>-->
+        <!--<pattern>%d{"ISO8601", UTC}  %p %t %c %M - %m%n</pattern>-->
+    <!--</appender>-->
+
     <logger name="akka" level="INFO"/>
     <logger name="com.typesafe" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="Console"/>
         <appender-ref ref="Sentry"/>
+        <appender-ref ref="Syslog"/>
+        <!--<appender-ref ref="Loggly"/>-->
     </root>
 
 </configuration>
