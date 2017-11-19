@@ -17,6 +17,7 @@ val akkaVersion = "2.5.6"
 libraryDependencies ++= Seq(
   "com.github.mfoody" %% "akka-boot" % "0.2-SNAPSHOT",
   "io.sentry" % "sentry-logback" % "1.6.3",
+  "org.logback-extensions" % "logback-ext-loggly" % "0.1.2",
 
   // Test
   "org.scalatest" %% "scalatest" % "3.0.4" % Test,
@@ -24,18 +25,19 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test,
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test)
 
-lazy val docker = taskKey[Unit]("Build docker image")
 
-docker := {
+lazy val dockerComposeUp = taskKey[Unit]("Run docker image in development")
+
+dockerComposeUp := {
   assembly.value
 
-  "docker build -t akka-boot-starter ."!
+  "docker-compose up -d"!
 }
 
-lazy val dockerRun = taskKey[Unit]("Run docker image in development")
+lazy val dockerComposeBuild = taskKey[Unit]("Build and update container")
 
-dockerRun := {
-  docker.value
+dockerComposeBuild := {
+  assembly.value
 
-  "docker run -d --name akka-boot -e environment=development --link loggly-docker:loggly -p 80:80 81:81 443:443 444:444 -t akka-boot-starter"!
+  "docker-compose up -d --no-deps --build web"!
 }

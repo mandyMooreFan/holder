@@ -12,11 +12,13 @@ class HelloWorldRoutes(system: ActorSystem, executionContext: ExecutionContext)
 
   override def route: Route = get {
     pathPrefix("hellos") {
-      completeWithActor {
-        if (Random.nextBoolean()) {
-          throw new Exception("Something bad happened")
-        } else {
-          "Hello World"
+      parameter("fail".?) { fail =>
+        completeWithActor {
+          if (fail.isDefined) {
+            throw new Exception("Something bad always happened")
+          } else {
+            "Hello Worlds"
+          }
         }
       }
     }
