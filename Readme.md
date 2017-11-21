@@ -65,4 +65,8 @@ monitor.
 
 
 ## Continuous Deployment to AWS
+Akka Boot leverages Packer, Terraform and Docker to create turnkey environments in AWS. Out of the box it creates 
+development and production swarms in separate VPCs. Each environment includes the following infrastructure, 
 
+* A bastion server with the only publicly available SSH port in the VPC.
+*  
