@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-chmod 700 /home/ubuntu/akka_boot.pem
+chmod 400 /home/ubuntu/akka_boot.pem
 
 sudo scp -o StrictHostKeyChecking=no \
     -o NoHostAuthenticationForLocalhost=yes \
@@ -9,3 +9,5 @@ sudo scp -o StrictHostKeyChecking=no \
     ubuntu@${swarm_manager_private_ip}:/home/ubuntu/token /home/ubuntu/token
 
 sudo docker swarm join --token $(cat /home/ubuntu/token) ${swarm_manager_private_ip}:2377
+
+sudo docker login -u ${docker_username} -p ${docker_password}

@@ -33,7 +33,7 @@ jobs:
           paths:
             - ~/.ivy2
             - ~/.sbt
-          key: v1-dependencies--{{ checksum "build.sbt" }}
+          key: v1-dependencies-{{ checksum "build.sbt" }}
 
       # run tests!
       - run: cat /dev/null | sbt test:test
@@ -50,3 +50,30 @@ jobs:
 
       - store-artifacts:
           path: ~/test-reports/
+
+  deploy:
+    docker:
+      - image:
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - setup_remote_docker:
+          docker_layer_caching: true
+
+      - run:
+          deployment/deploy_environment.sh
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build-job
+      - deploy-job:
+          requires:
+            - build-job
+          filters:
+            branches:
+              only: master
