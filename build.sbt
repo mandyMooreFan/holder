@@ -26,6 +26,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test)
 
 
+
+
 lazy val dockerComposeUp = taskKey[Unit]("Run docker image in development")
 
 dockerComposeUp := {

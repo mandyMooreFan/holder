@@ -1,7 +1,8 @@
 # Introduction
 The Akka Boot project exists to simplify writing the code for production ready Akka HTTP services. However 
-Akka Boot does not make any choices about the tools and processes you use to deliver your product. In practice it's a 
-huge additional effort to setup everything to build, deploy and operate an application. This project exists to help.
+Akka Boot focuses solely on the code you write and does not make any choices about the tools and processes you use to 
+deliver your product. In practice it's a huge additional effort to setup everything to build, deploy and operate an 
+application. This sister project exists to help.
 
 If you choose to use the tools we've integrated, you can be up and running with a modern development, deployment and 
 operation in half an hour. If you don't like our choices, you can still use our integrations as examples for how to
@@ -12,23 +13,25 @@ Here's what we provide,
 * A monorepo project template using SBT. Develop all your services and UI as projects within a single 
 Git repository with an integrated build process managed by SBT. SBT makes it easy (SBT easy...) for you to control the 
 extent to which you share common code among your projects.
-* Tight integration with Docker. Docker Compose handles local development. Deployed environments run on Docker Swarm. 
+* Tight integration with Docker. Docker is used throughout the project to avoid dealing with installs. Docker Swarm is
+also used to run your application locally and on AWS. 
 * Continuous integration with Circle CI. Cirle CI will build all commits to your project and deploy commits made to the
 master and production branches. 
 * Consolidated logging to Loggly. VMs, containers and any available AWS logs are routed to Loggly.
 * Error reporting by Sentry.io. System, application and AWS errors are sent to Sentry.io.
 * System monitoring to DataDog. 
 * Continuous deployment to development and production environments on AWS. We use Hashicorp Packer and Terraform to 
-deliver the following distinct architecture for development and production,
+deliver the following distinct environments for development and production,
   * A separate VPC.
   * A Docker Swarm to deploy your application services. Separate autoscaling groups for swarm managers and workers both 
-  of which are distribute across three availability zones.
+  of which are distributed across three availability zones.
   * A bastion server which provides the only SSH access to the VPC. 
   * An ELB which routes HTTPS traffic to your Docker Swarm reverse proxy (Traefik).
   * An otherwise production ready infrastructure. We have done our best to create a secure by default environment 
-  and configure AWS with a production ready configuration. 
+  and setup AWS with a production ready configuration. 
     * Port 22 on the bastion server and port 443 on the ELB are the only open public ports.
-    * Detailing monitoring is enabled for all instances.
+    * End to end encryption of all communication.
+    * Detailed monitoring is enabled for all instances.
     * Configuration changes are logged to Loggly.
     * Security groups tightly control the network traffic within the VPC.
   
@@ -50,8 +53,8 @@ To get started clone this project
 ```
 
 ## Docker
-Many of the following steps require Docker. If you don't already have it, go install Docker now. If you don't want to 
-use Docker this project isn't going to be much help.
+Just about everything that follows requires Docker. If you don't already have it, go install Docker now. If you don't 
+want to use Docker this project isn't going to be much help.
 
 ## Continuous Integration with Circle CI
 
@@ -84,14 +87,16 @@ monitor.
 ```
 
 ## Log Aggregation with Loggly
-
+Akka Boot Starter integrates with Loggly to provide log aggregation. To enable the integration you must have a Loggly 
+account and an active Loggly source key. To create your Loggly account, go to 
+[Sign-Up for Loggly](https://www.loggly.com/signup/).
 
 ## System Monitoring with Datadog
 
 
 ## Continuous Deployment to AWS
-Akka Boot leverages Packer, Terraform and Docker to create turnkey environments in AWS. Out of the box it creates 
-development and production swarms in separate VPCs. Each environment includes the following infrastructure, 
+Akka Boot Starter leverages Packer, Terraform and Docker to create turnkey environments in AWS. To enable AWS 
+integration you must have an AWS account and IAM credentials with administrative authority. Perform the following
+steps to get started with AWS,
 
-* A bastion server with the only publicly available SSH port in the VPC.
-*  
+1. 

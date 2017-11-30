@@ -29,9 +29,8 @@ esac
 function deploy_to_local_machine {
     echo "Deploying to local environment"
     create_local_swarm
+    build_images
     deploy_to_local_swarm
-
-    echo "$APPLICATION_NAME deployed to the following nodes"
 }
 
 function create_local_swarm {
@@ -68,18 +67,33 @@ function create_local_swarm {
             --advertise-addr $(docker-machine ip worker2) \
             $(docker-machine ip manager)"
 
-        docker-machine ls
-
         echo "Docker Swarm created"
+        docker-machine ls
     fi
 }
 
-function deploy_to_local_swarm {
+function build_images {
+    echo "Building updated images"
+    docker-compose build
+    docker-compose push
+}
 
+function deploy_to_local_swarm {
     echo "Deploying $APPLICATION_NAME to Docker Swarm"
 
     docker-machine scp "localhost:$DIR/../docker-compose.yml" manager:/home/docker/
     docker-machine ssh manager "docker stack deploy -c docker-compose.yml $APPLICATION_NAME"
+
+    printf "\n****************************************\n"
+    echo "$APPLICATION_NAME deployment is complete"
+    echo "$APPLICATION_NAME deployed to following instances"
+
+    printf "\n\n"
+    docker-machine ls
+
+    printf "\n\n"
+    docker-machine ssh manager "docker service ls"
+
 }
 
 function deploy_to_aws {
