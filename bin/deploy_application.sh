@@ -29,6 +29,7 @@ esac
 function deploy_to_local_machine {
     echo "Deploying to local environment"
     create_local_swarm
+    build_projects
     build_images
     deploy_to_local_swarm
 }
@@ -70,6 +71,11 @@ function create_local_swarm {
         echo "Docker Swarm created"
         docker-machine ls
     fi
+}
+
+function build_projects {
+    echo "Building fat jars"
+    sbt assembly
 }
 
 function build_images {
