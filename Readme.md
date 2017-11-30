@@ -335,9 +335,9 @@ In this case the services weren't all up when the command finished. To check the
 ```bash
 > docker-machine ssh manager "docker service ls"
 ID                  NAME                          MODE                REPLICAS            IMAGE                               PORTS
-b4199cuoocws        akka-boot-starter_loggly      global              0/3                 sendgridlabs/loggly-docker:latest
-o2btxu03yu3h        akka-boot-starter_traefik     replicated          0/1                 traefik:latest                      *:80->80/tcp,*:8080->8080/tcp
-eqe76enwhc10        akka-boot-starter_web         global              0/3                 wmfoody/akka-boot:latest
+b4199cuoocws        akka-boot-starter_loggly      global              3/3                 sendgridlabs/loggly-docker:latest
+o2btxu03yu3h        akka-boot-starter_traefik     replicated          1/1                 traefik:latest                      *:80->80/tcp,*:8080->8080/tcp
+eqe76enwhc10        akka-boot-starter_web         global              3/3                 wmfoody/akka-boot:latest
 63j4a4uunxf1        akka-boot-starter_whoami      replicated          1/1                 emilevauge/whoami:latest
 v0aulom6aam7        akka-boot-starter_whoareyou   replicated          1/1                 emilevauge/whoami:latest
 ```
