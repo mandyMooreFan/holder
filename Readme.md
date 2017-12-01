@@ -62,6 +62,47 @@ To get started clone this project
 Just about everything that follows requires Docker. If you don't already have it, go install Docker now. If you don't 
 want to use Docker this project isn't going to be much help.
 
+1. Install Docker
+
+https://store.docker.com/editions/community/docker-ce-desktop-mac
+https://store.docker.com/editions/community/docker-ce-desktop-windows
+
+2. Create a Docker Hub account.
+
+https://hub.docker.com/
+
+3. Login to Docker Hub
+
+```bash
+> docker login 
+```
+
+4. Give it a test run
+
+```bash
+> docker run hello-world
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+To try something more ambitious, you can run an Ubuntu container with:
+ $ docker run -it ubuntu bash
+
+Share images, automate workflows, and more with a free Docker ID:
+ https://cloud.docker.com/
+
+For more examples and ideas, visit:
+ https://docs.docker.com/engine/userguide/
+```
+
 ## Continuous Integration with Circle CI
 
 ## UI Development 
@@ -389,7 +430,6 @@ you should be able to access any service on any of the nodes on port 80 or 443.
   
 > curl 192.168.8.116/yo/goodbyes
   "Goodbye"
-  
 ```
  
 # Deploying to AWS
