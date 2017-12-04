@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This is to prevent path mangling in Windows. It should have no effective on Linux or Mac.
+# This is to prevent path mangling in Windows. It should have no effect on Linux or Mac.
 # https://stackoverflow.com/questions/7250130/how-to-stop-mingw-and-msys-from-mangling-path-names-given-at-the-command-line
 export MSYS_NO_PATHCONV=1
 
