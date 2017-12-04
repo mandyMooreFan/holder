@@ -2,13 +2,15 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}"/../ )" && pwd )"
+PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../ && pwd )"
 
 APPLICATION_NAME=${PWD##*/}
 
 ENVIRONMENT="$1"
 
 OS=${OSTYPE//[0-9.-]*/}
+
+echo "Deploying $APPLICATION_NAME to $ENVIRONMENT from $PROJECT_DIR"
 
 case "$OS" in
   darwin)
@@ -36,6 +38,12 @@ function deploy_to_local_machine {
     deploy_to_local_swarm
 }
 
+function create_windows_swarm {
+    docker-machine create -d hyperv --hyperv-virtual-switch akka-boot manager
+    docker-machine create -d hyperv --hyperv-virtual-switch akka-boot worker1
+    docker-machine create -d hyperv --hyperv-virtual-switch akka-boot worker2
+}
+
 function create_local_swarm {
     echo "Checking for existing swarm"
 
@@ -47,9 +55,15 @@ function create_local_swarm {
         echo "Existing swarm not found"
         echo "Creating new swarm"
 
-        docker-machine create -d hyperv --hyperv-virtual-switch akka-boot manager
-        docker-machine create -d hyperv --hyperv-virtual-switch akka-boot worker1
-        docker-machine create -d hyperv --hyperv-virtual-switch akka-boot worker2
+        case "$OS" in
+          msys)
+            create_windows_swarm
+            ;;
+          *)
+
+          echo "Unsupported Operating system $OSTYPE"
+          exit 1
+        esac
 
         docker-machine ssh manager "docker swarm init \
             --listen-addr $(docker-machine ip manager) \
@@ -118,7 +132,7 @@ function deploy_to_aws {
 if [ -z ${ENVIRONMENT} ]; then
     echo "Environment argument is required";
 elif [ "local" = ${ENVIRONMENT} ]; then
-    deploy_to_local_machine;
+     deploy_to_local_machine;
 else
-    deploy_to_aws;
+     deploy_to_aws;
 fi;
