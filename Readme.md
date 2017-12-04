@@ -200,7 +200,31 @@ of this tutorial. We'll add a new route.
 ```
 
 5. Assuming everything worked deploy your code to your local Docker Swarm. The following script will create a local
-Swarm if one doesn't exist. 
+Swarm if one doesn't exist.
+
+In docker-compose.yml change the "image:"(Line 41) to a Docker Hub Repository you have created. 
+```
+  web:
+    build: .
+    image: {dockerUserName}/{repoName}:latest
+    environment:
+      environment: development
+    networks:
+
+```
+
+Make sure you have a HyperV Virtual Network Switch by the name of "akka-boot".  You can check this by using the
+following commands in windows Powershell.
+
+```
+Get-NetAdaptor -Name "vEthernet (akka-boot)"
+```
+
+If this returns an error it means you need to run the follow command to create it:
+
+```
+New-VMSwitch -name akka-boot  -NetAdapterName Ethernet
+```
 
 If you're using Windows
 
