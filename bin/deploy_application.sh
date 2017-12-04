@@ -47,14 +47,13 @@ function create_local_swarm {
         echo "Existing swarm not found"
         echo "Creating new swarm"
 
-        docker-machine create -d hyperv manager
-        docker-machine create -d hyperv worker1
-        docker-machine create -d hyperv worker2
+        docker-machine create -d hyperv --hyperv-virtual-switch akka-boot manager
+        docker-machine create -d hyperv --hyperv-virtual-switch akka-boot worker1
+        docker-machine create -d hyperv --hyperv-virtual-switch akka-boot worker2
 
         docker-machine ssh manager "docker swarm init \
             --listen-addr $(docker-machine ip manager) \
-            --advertise-addr $(docker-machine ip manager) \
-            --hyperv-virtual-switch akka-boot"
+            --advertise-addr $(docker-machine ip manager)"
 
         export worker_token=$(docker-machine ssh manager "docker swarm join-token worker -q")
 
@@ -62,14 +61,12 @@ function create_local_swarm {
             --token=${worker_token} \
             --listen-addr $(docker-machine ip worker1) \
             --advertise-addr $(docker-machine ip worker1) \
-            --hyperv-virtual-switch akka-boot \
             $(docker-machine ip manager)"
 
         docker-machine ssh worker2 "docker swarm join \
             --token=${worker_token} \
             --listen-addr $(docker-machine ip worker2) \
             --advertise-addr $(docker-machine ip worker2) \
-            --hyperv-virtual-switch akka-boot \
             $(docker-machine ip manager)"
 
         echo "Docker Swarm created"
