@@ -2,6 +2,8 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}"/../ )" && pwd )"
+
 APPLICATION_NAME=${PWD##*/}
 
 ENVIRONMENT="$1"
@@ -41,7 +43,6 @@ function create_local_swarm {
 
     if [ "Running" = ${STATUS} ]; then
         echo "Existing swarm found"
-
     else
         echo "Existing swarm not found"
         echo "Creating new swarm"
@@ -52,7 +53,8 @@ function create_local_swarm {
 
         docker-machine ssh manager "docker swarm init \
             --listen-addr $(docker-machine ip manager) \
-            --advertise-addr $(docker-machine ip manager)"
+            --advertise-addr $(docker-machine ip manager) \
+            --hyperv-virtual-switch akka-boot"
 
         export worker_token=$(docker-machine ssh manager "docker swarm join-token worker -q")
 
@@ -60,12 +62,14 @@ function create_local_swarm {
             --token=${worker_token} \
             --listen-addr $(docker-machine ip worker1) \
             --advertise-addr $(docker-machine ip worker1) \
+            --hyperv-virtual-switch akka-boot \
             $(docker-machine ip manager)"
 
         docker-machine ssh worker2 "docker swarm join \
             --token=${worker_token} \
             --listen-addr $(docker-machine ip worker2) \
             --advertise-addr $(docker-machine ip worker2) \
+            --hyperv-virtual-switch akka-boot \
             $(docker-machine ip manager)"
 
         echo "Docker Swarm created"
@@ -75,7 +79,13 @@ function create_local_swarm {
 
 function build_projects {
     echo "Building fat jars"
-    sbt assembly
+    docker run -it \
+        -v "${HOME}/.sbt":/root/.sbt \
+        -v "${HOME}/.m2":/root/.m2 \
+        -v "${HOME}/.ivy2":/root/.ivy2 \
+        -v "${PROJECT_DIR}":/root/src \
+        -w /root/src \
+        hseeberger/scala-sbt sbt assembly
 }
 
 function build_images {
