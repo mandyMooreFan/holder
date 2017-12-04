@@ -56,16 +56,16 @@ docker run \
     -w /app/deployment/ \
     -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
     -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
-    -it hashicorp/terraform:light init ${DEPLOYMENT_DIR}
+    -it hashicorp/terraform:light init
 
 # Deploy
 docker run \
     -v "$PROJECT_DIR:/app/" \
-    -w /app/ \
+    -w /app/deployment/ \
     -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
     -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
     -e TF_VAR_application_name=${APPLICATION_NAME} \
     -e TF_VAR_docker_username=${DOCKER_USERNAME} \
     -e TF_VAR_docker_password=${DOCKER_PASSWORD} \
     -e TF_VAR_logs_bucket=${LOGS_BUCKET} \
-    -it hashicorp/terraform:light apply ${DEPLOYMENT_DIR}
+    -it hashicorp/terraform:light apply
