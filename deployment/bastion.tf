@@ -37,7 +37,7 @@ resource "aws_launch_configuration" "bastion" {
   name_prefix = "${var.application_name}_${var.environment_name}_bastion_"
   image_id = "${data.aws_ami.bastion.id}"
   instance_type = "${var.bastion_instance_type}"
-  key_name = "${var.bastion_key_name}"
+  key_name = "${var.key_name}"
 
   security_groups = [
     "${aws_security_group.loggly.id}",

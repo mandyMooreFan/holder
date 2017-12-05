@@ -6,9 +6,9 @@ resource "aws_elb" "swarm_http" {
   connection_draining_timeout = 300
 
   subnets = [
-    "${aws_subnet.subnet_1_private.id}",
-    "${aws_subnet.subnet_2_private.id}",
-    "${aws_subnet.subnet_3_private.id}"]
+    "${aws_subnet.subnet_1_public.id}",
+    "${aws_subnet.subnet_2_public.id}",
+    "${aws_subnet.subnet_3_public.id}"]
 
   security_groups = [
     "${aws_security_group.swarm_elb.id}"]
@@ -25,14 +25,13 @@ resource "aws_elb" "swarm_http" {
     unhealthy_threshold = 2
     interval = 30
     timeout = 3
-    target = "HTTP:8080/"
+    target = "HTTP:8080/dashboard/"
   }
 
   access_logs {
     bucket = "${var.logs_bucket}"
     bucket_prefix = "${var.application_name}/${var.environment_name}/elbs/swarm"
     interval = 5
-
   }
 
   tags {
@@ -65,7 +64,6 @@ resource "aws_security_group" "swarm_elb" {
     protocol = "tcp"
     to_port = 80
     security_groups = [
-      "${aws_security_group.swarm_node.id}",
       "${aws_security_group.swarm_node.id}"]
   }
 
@@ -84,7 +82,15 @@ resource "aws_security_group" "swarm_elb" {
     protocol = "tcp"
     to_port = 443
     security_groups = [
-      "${aws_security_group.swarm_node.id}",
+      "${aws_security_group.swarm_node.id}"]
+  }
+
+  # Allow HTTP traffic to the health check
+  egress {
+    from_port = 8080
+    protocol = "tcp"
+    to_port = 8080
+    security_groups = [
       "${aws_security_group.swarm_node.id}"]
   }
 
@@ -101,7 +107,7 @@ resource "aws_instance" "swarm_manager" {
   instance_type = "${var.swarm_manager_instance_type}"
   subnet_id = "${aws_subnet.subnet_1_private.id}"
   user_data = "${data.template_file.swarm_manager_user_data.rendered}"
-  key_name = "${var.swarm_key_name}"
+  key_name = "${var.key_name}"
 
   vpc_security_group_ids = [
     "${aws_security_group.loggly.id}",
@@ -133,7 +139,6 @@ data "aws_ami" "swarm" {
 
   owners = [
     "self"]
-
 }
 
 data "template_file" "swarm_manager_user_data" {
@@ -183,7 +188,7 @@ resource "aws_launch_configuration" "swarm_worker" {
   image_id = "${data.aws_ami.swarm.id}"
   instance_type = "${var.swarm_node_instance_type}"
   user_data = "${data.template_file.swarm_worker_user_data.rendered}"
-  key_name = "${var.swarm_key_name}"
+  key_name = "${var.key_name}"
 
   security_groups = [
     "${aws_security_group.loggly.id}",

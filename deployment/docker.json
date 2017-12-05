@@ -33,7 +33,7 @@
     },
     {
       "type": "file",
-      "source": "{{user `swarm_key`}}",
+      "source": ".terraform/{{user `swarm_key`}}",
       "destination": "/home/ubuntu/akka_boot.pem"
     },
     {

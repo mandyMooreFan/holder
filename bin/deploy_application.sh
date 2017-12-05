@@ -6,11 +6,11 @@ PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../ && pwd )"
 
 APPLICATION_NAME=${PWD##*/}
 
-ENVIRONMENT="$1"
+ENVIRONMENT_NAME="$1"
 
 OS=${OSTYPE//[0-9.-]*/}
 
-echo "Deploying $APPLICATION_NAME to $ENVIRONMENT from $PROJECT_DIR"
+echo "Deploying $APPLICATION_NAME to $ENVIRONMENT_NAME from $PROJECT_DIR"
 
 case "$OS" in
   darwin)
@@ -124,14 +124,15 @@ function deploy_to_local_swarm {
 }
 
 function deploy_to_aws {
-    echo "Deploying to AWS $ENVIRONMENT environment"
-    scp -i akka_boot.pem ../docker-compose.yml ubuntu@dev_swarm_manager:/home/ubuntu/
-    ssh -i akka_boot.pem ubuntu@dev_swarm_manager 'sudo docker stack deploy -c docker-compose.yml akka-boot'
+    echo "Deploying to AWS $ENVIRONMENT_NAME environment"
+    scp  ${PROJECT_DIR}/docker-compose.yml dev_manager:/home/ubuntu/
+    ssh dev_manager 'sudo docker stack deploy -c docker-compose.yml akka-boot'
+    ssh dev_manager 'sudo docker service ls'
 }
 
-if [ -z ${ENVIRONMENT} ]; then
+if [ -z ${ENVIRONMENT_NAME} ]; then
     echo "Environment argument is required";
-elif [ "local" = ${ENVIRONMENT} ]; then
+elif [ "local" = ${ENVIRONMENT_NAME} ]; then
      deploy_to_local_machine;
 else
      deploy_to_aws;

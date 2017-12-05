@@ -28,7 +28,6 @@ variable "application_name" {
 
 variable "environment_name" {
   type = "string"
-  default = "dev"
 }
 
 variable "logs_bucket" {
@@ -37,22 +36,11 @@ variable "logs_bucket" {
 
 variable "key_name" {
   type = "string"
-  default = "akka_boot"
 }
 
 variable "bastion_instance_type" {
   type = "string"
   default = "t2.micro"
-}
-
-variable "bastion_key_name" {
-  type = "string"
-  default = "akka_boot"
-}
-
-variable "swarm_key_name" {
-  type = "string"
-  default = "akka_boot"
 }
 
 variable "swarm_manager_instance_type" {
