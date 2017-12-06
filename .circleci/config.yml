@@ -61,12 +61,9 @@ jobs:
     steps:
       - checkout
 
-      - setup_remote_docker:
-          docker_layer_caching: true
+      - run: bash bin/deploy_environment.sh
 
-      - run: bin/deploy_environment.sh
-
-      - run: bin/deploy_application.sh dev
+      - run: bash bin/deploy_application.sh dev
 
 workflows:
   version: 2
