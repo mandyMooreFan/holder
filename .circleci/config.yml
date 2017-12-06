@@ -51,29 +51,31 @@ jobs:
       - store-artifacts:
           path: ~/test-reports/
 
-#  deploy:
-#    docker:
-#      - image:
-#
-#    working_directory: ~/repo
-#
-#    steps:
-#      - checkout
-#
-#      - setup_remote_docker:
-#          docker_layer_caching: true
-#
-#      - run:
-#          deployment/deploy_environment.sh
+  deploy:
+    docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:8-jdk
 
-#workflows:
-#  version: 2
-#  build-deploy:
-#    jobs:
-#      - build-job
-#      - deploy-job:
-#          requires:
-#            - build-job
-#          filters:
-#            branches:
-#              only: master
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - setup_remote_docker:
+          docker_layer_caching: true
+
+      - run:
+          deployment/deploy_environment.sh
+          deployment/deploy_application.sh dev
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build-job
+      - deploy-dev:
+          requires:
+            - build-job
+          filters:
+            branches:
+              only: master
