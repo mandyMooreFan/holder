@@ -64,9 +64,9 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
 
-      - run: deployment/deploy_environment.sh
+      - run: bin/deploy_environment.sh
 
-      - run: deployment/deploy_application.sh dev
+      - run: bin/deploy_application.sh dev
 
 workflows:
   version: 2
