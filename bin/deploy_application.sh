@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# This is to prevent path mangling in Windows. It should have no effect on Linux or Mac.
+# https://stackoverflow.com/questions/7250130/how-to-stop-mingw-and-msys-from-mangling-path-names-given-at-the-command-line
+export MSYS_NO_PATHCONV=1
+
 ENVIRONMENT_NAME="$1"
 
 if [ -z "${APPLICATION_NAME}" ]; then
@@ -98,11 +102,12 @@ function create_local_swarm {
 
 function build_projects {
     echo "Building fat jars"
+    echo "${HOME}"
     docker run -it \
-        -v "${HOME}/.sbt":/root/.sbt \
-        -v "${HOME}/.m2":/root/.m2 \
-        -v "${HOME}/.ivy2":/root/.ivy2 \
-        -v "${PROJECT_DIR}":/root/src \
+        -v "${HOME}/.sbt:/root/.sbt" \
+        -v "${HOME}/.m2/:/root/.m2" \
+        -v "${HOME}/.ivy2/:/root/.ivy2" \
+        -v "${PROJECT_DIR}:/root/src" \
         -w /root/src \
         hseeberger/scala-sbt sbt assembly
 }
