@@ -1,16 +1,24 @@
 #!/usr/bin/env bash
 
+ENVIRONMENT_NAME="$1"
+
+if [ -z "${APPLICATION_NAME}" ]; then
+    echo "You must set the APPLICATION_NAME environment variable."
+    exit 0;
+fi
+
+if [ -z "${ENVIRONMENT_NAME}" ]; then
+    echo "WARNING: You have not set the ENVIRONMENT_NAME environment variable. Defaulting to dev."
+    ENVIRONMENT_NAME=dev
+fi
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../ && pwd )"
 
-APPLICATION_NAME=${PWD##*/}
-
-ENVIRONMENT_NAME="$1"
+KEY_PAIR_NAME="${APPLICATION_NAME}_${ENVIRONMENT_NAME}"
 
 OS=${OSTYPE//[0-9.-]*/}
-
-echo "Deploying $APPLICATION_NAME to $ENVIRONMENT_NAME from $PROJECT_DIR"
 
 case "$OS" in
   darwin)
@@ -106,7 +114,7 @@ function build_images {
 }
 
 function deploy_to_local_swarm {
-    echo "Deploying $APPLICATION_NAME to Docker Swarm"
+    echo "Deploying $APPLICATION_NAME to Local Docker Swarm from $PROJECT_DIR"
 
     docker-machine scp "localhost:$DIR/../docker-compose.yml" manager:/home/docker/
     docker-machine ssh manager "docker stack deploy -c docker-compose.yml $APPLICATION_NAME"
@@ -120,14 +128,52 @@ function deploy_to_local_swarm {
 
     printf "\n\n"
     docker-machine ssh manager "docker service ls"
-
 }
 
 function deploy_to_aws {
-    echo "Deploying to AWS $ENVIRONMENT_NAME environment"
-    scp  ${PROJECT_DIR}/docker-compose.yml dev_manager:/home/ubuntu/
-    ssh dev_manager 'sudo docker stack deploy -c docker-compose.yml akka-boot'
-    ssh dev_manager 'sudo docker service ls'
+    if [ -z "${AWS_ACCESS_KEY_ID}" ]; then
+        echo "You must set the AWS_ACCESS_KEY_ID environment variable."
+        exit 0;
+    fi
+
+    if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+        echo "You must set the AWS_SECRET_ACCESS_KEY environment variable."
+        exit 0;
+    fi
+
+    echo "Deploying $APPLICATION_NAME to AWS $ENVIRONMENT_NAME Docker Swarm from $PROJECT_DIR"
+
+    BASTION=$(docker run \
+        -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+        -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+        -it cgswong/aws aws ec2 describe-instances \
+        --region us-east-1 \
+        --filters "Name=tag:Name,Values=${APPLICATION_NAME}_${ENVIRONMENT_NAME}_bastion" \
+        --query "Reservations[*].Instances[*].[PublicIpAddress]" \
+        --output=text)
+    echo "Connecting to Bastion: ${BASTION}"
+
+    SWARM_MANAGER=$(docker run \
+        -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+        -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+        -it cgswong/aws aws ec2 describe-instances \
+        --region us-east-1 \
+        --filters "Name=tag:Name,Values=${APPLICATION_NAME}_${ENVIRONMENT_NAME}_swarm_manager_0" \
+        --query "Reservations[*].Instances[*].[PrivateIpAddress]" \
+        --output=text)
+    echo "Connecting to Swarm Manager: ${SWARM_MANAGER}"
+
+    KEY="${PROJECT_DIR}/deployment/.terraform/${KEY_PAIR_NAME}"
+    PROXY="ProxyCommand ssh -i $PROJECT_DIR/deployment/.terraform/$KEY_PAIR_NAME ubuntu@$BASTION nc $SWARM_MANAGER 22"
+
+    scp -i "${KEY}" -o "${PROXY}" \
+        ${PROJECT_DIR}/docker-compose.yml ubuntu@${SWARM_MANAGER}:/home/ubuntu/
+
+    ssh -i "${KEY}" -o "${PROXY}" \
+        -t ubuntu@${SWARM_MANAGER} "sudo docker stack deploy -c docker-compose.yml ${APPLICATION_NAME}"
+
+    ssh -i "${KEY}" -o "${PROXY}" \
+        -t ubuntu@${SWARM_MANAGER} 'sudo docker service ls'
 }
 
 if [ -z ${ENVIRONMENT_NAME} ]; then
