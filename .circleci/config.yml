@@ -62,7 +62,7 @@ jobs:
       - checkout
 
       - setup_remote_docker:
-        docker_layer_caching: true
+          docker_layer_caching: true
 
       - restore_cache:
           keys:
