@@ -61,7 +61,19 @@ jobs:
     steps:
       - checkout
 
+      - setup_remote_docker:
+        docker_layer_caching: true
+
+      - restore_cache:
+          keys:
+          - v1-terraform
+
       - run: bash bin/deploy_environment.sh
+
+      - save_cache:
+          paths:
+            - deployment/.terraform
+          key: v1-terraform
 
       - run: bash bin/deploy_application.sh dev
 
