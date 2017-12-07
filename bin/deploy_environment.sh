@@ -97,6 +97,8 @@ docker run \
     -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
     -it hashicorp/terraform:light init
 
+TERRAFORM_STATE="${PROJECT_DIR}/deployment/.terraform/${ENVIRONMENT_NAME}.tfstate"
+
 # Deploy
 docker run \
     -v "$PROJECT_DIR:/app/" \
@@ -109,4 +111,4 @@ docker run \
     -e TF_VAR_docker_username=${DOCKER_USERNAME} \
     -e TF_VAR_docker_password=${DOCKER_PASSWORD} \
     -e TF_VAR_logs_bucket=${LOGS_BUCKET} \
-    -it hashicorp/terraform:light apply
+    -it hashicorp/terraform:light apply -auto-approve -refresh=true -state=${TERRAFORM_STATE}
