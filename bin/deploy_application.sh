@@ -135,19 +135,7 @@ function deploy_to_local_swarm {
     docker-machine ssh manager "docker service ls"
 }
 
-function deploy_to_aws {
-    if [ -z "${AWS_ACCESS_KEY_ID}" ]; then
-        echo "You must set the AWS_ACCESS_KEY_ID environment variable."
-        exit 0;
-    fi
-
-    if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
-        echo "You must set the AWS_SECRET_ACCESS_KEY environment variable."
-        exit 0;
-    fi
-
-    echo "Deploying $APPLICATION_NAME to AWS $ENVIRONMENT_NAME Docker Swarm from $PROJECT_DIR"
-
+function deploy_to_aws_swarm {
     BASTION=$(docker run \
         -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
         -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
@@ -179,6 +167,24 @@ function deploy_to_aws {
 
     ssh -i "${KEY}" -o "${PROXY}" \
         -t ubuntu@${SWARM_MANAGER} 'sudo docker service ls'
+}
+
+function deploy_to_aws {
+    if [ -z "${AWS_ACCESS_KEY_ID}" ]; then
+        echo "You must set the AWS_ACCESS_KEY_ID environment variable."
+        exit 0;
+    fi
+
+    if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+        echo "You must set the AWS_SECRET_ACCESS_KEY environment variable."
+        exit 0;
+    fi
+
+    echo "Deploying $APPLICATION_NAME to AWS $ENVIRONMENT_NAME Docker Swarm from $PROJECT_DIR"
+
+    build_projects
+    build_images
+    deploy_to_aws_swarm
 }
 
 if [ -z ${ENVIRONMENT_NAME} ]; then
