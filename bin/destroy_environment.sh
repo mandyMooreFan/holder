@@ -23,13 +23,26 @@ if [ -z "${APPLICATION_NAME}" ]; then
     exit 0;
 fi
 
+if [ -z "${ENVIRONMENT_NAME}" ]; then
+    echo "WARNING: You have not set the ENVIRONMENT_NAME environment variable. Defaulting to dev."
+    ENVIRONMENT_NAME=dev
+fi
+
+KEY_PAIR_NAME="${APPLICATION_NAME}_${ENVIRONMENT_NAME}"
+
+TERRAFORM_STATE=".terraform/${ENVIRONMENT_NAME}.tfstate"
+
+echo "Terraform state saved in $TERRAFORM_STATE"
+
 docker run -i \
     -v "$PROJECT_DIR:/app/" \
     -w /app/deployment/ \
     -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
     -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
     -e TF_VAR_application_name=${APPLICATION_NAME} \
+    -e TF_VAR_environment_name=${ENVIRONMENT_NAME} \
     -e TF_VAR_docker_username=${DOCKER_USERNAME} \
     -e TF_VAR_docker_password=${DOCKER_PASSWORD} \
     -e TF_VAR_logs_bucket=${LOGS_BUCKET} \
-    -t hashicorp/terraform:light destroy
+    -e TF_VAR_key_name=${KEY_PAIR_NAME} \
+    -t hashicorp/terraform:light destroy -refresh=true -state=${TERRAFORM_STATE}
