@@ -114,6 +114,7 @@ function build_projects {
 
 function build_images {
     echo "Building updated images"
+    docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
     docker-compose build
     docker-compose push
 }
