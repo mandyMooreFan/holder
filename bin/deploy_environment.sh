@@ -69,25 +69,25 @@ if [ ! -e "${PRIVATE_KEY}" ]; then
 fi
 
 # Build the AMI for the Bastion Server
-#docker run \
-#    -v "${PROJECT_DIR}:/app/" \
-#    -w /app/deployment/ \
-#    -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
-#    -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
-#    -e APPLICATION_NAME=${APPLICATION_NAME} \
-#    -e LOGGLY_TOKEN=${LOGGLY_TOKEN} \
-#    -it hashicorp/packer:light build bastion.json
+docker run \
+    -v "${PROJECT_DIR}:/app/" \
+    -w /app/deployment/ \
+    -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+    -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+    -e APPLICATION_NAME=${APPLICATION_NAME} \
+    -e LOGGLY_TOKEN=${LOGGLY_TOKEN} \
+    -it hashicorp/packer:light build bastion.json
 
 # Build the AMI for the Docker Swarm nodes
-#docker run \
-#    -v "$PROJECT_DIR:/app/" \
-#    -w /app/deployment/ \
-#    -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
-#    -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
-#    -e APPLICATION_NAME=${APPLICATION_NAME} \
-#    -e LOGGLY_TOKEN=${LOGGLY_TOKEN} \
-#    -e SWARM_KEY=${KEY_PAIR_NAME} \
-#    -it hashicorp/packer:light build docker.json
+docker run \
+    -v "$PROJECT_DIR:/app/" \
+    -w /app/deployment/ \
+    -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+    -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+    -e APPLICATION_NAME=${APPLICATION_NAME} \
+    -e LOGGLY_TOKEN=${LOGGLY_TOKEN} \
+    -e SWARM_KEY=${KEY_PAIR_NAME} \
+    -it hashicorp/packer:light build docker.json
 
 # Initialize Terraform
 docker run \
