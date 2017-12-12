@@ -45,12 +45,12 @@ variable "bastion_instance_type" {
 
 variable "swarm_manager_instance_type" {
   type = "string"
-  default = "t2.medium"
+  default = "r4.large"
 }
 
 variable "swarm_node_instance_type" {
   type = "string"
-  default = "t2.medium"
+  default = "r4.large"
 }
 
 variable "docker_username" {

@@ -152,7 +152,7 @@ data "template_file" "swarm_manager_user_data" {
 
 resource "aws_autoscaling_group" "swarm_workers" {
   name = "${var.application_name}_${var.environment_name}_swarm_workers"
-  launch_configuration = "${aws_launch_configuration.swarm_worker.name}"
+  launch_configuration = "${var.environment_name == "dev" ? aws_launch_configuration.swarm_worker_dev.name : aws_launch_configuration.swarm_worker_prod.name}"
   min_size = 1
   max_size = 3
   desired_capacity = 2
@@ -183,7 +183,26 @@ resource "aws_autoscaling_group" "swarm_workers" {
   }
 }
 
-resource "aws_launch_configuration" "swarm_worker" {
+resource "aws_launch_configuration" "swarm_worker_dev" {
+  name_prefix = "${var.application_name}_${var.environment_name}_swarm_worker_"
+  image_id = "${data.aws_ami.swarm.id}"
+  instance_type = "${var.swarm_node_instance_type}"
+  user_data = "${data.template_file.swarm_worker_user_data.rendered}"
+  key_name = "${var.key_name}"
+  spot_price = "0.13"
+
+  security_groups = [
+    "${aws_security_group.loggly.id}",
+    "${aws_security_group.ntp.id}",
+    "${aws_security_group.ssh.id}",
+    "${aws_security_group.swarm_node.id}"]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_launch_configuration" "swarm_worker_prod" {
   name_prefix = "${var.application_name}_${var.environment_name}_swarm_worker_"
   image_id = "${data.aws_ami.swarm.id}"
   instance_type = "${var.swarm_node_instance_type}"
