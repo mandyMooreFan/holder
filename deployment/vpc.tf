@@ -53,9 +53,9 @@ resource "aws_subnet" "subnet_1_private" {
   }
 }
 
-resource "aws_nat_gateway" "subnet_1_private" {
-  subnet_id = "${aws_subnet.subnet_1_private.id}"
-  allocation_id = "${aws_eip.subnet_1_private_nat.id}"
+resource "aws_nat_gateway" "subnet_1_public" {
+  subnet_id = "${aws_subnet.subnet_1_public.id}"
+  allocation_id = "${aws_eip.subnet_1_nat.id}"
 
   depends_on = [
     "aws_internet_gateway.gateway"]
@@ -67,7 +67,7 @@ resource "aws_nat_gateway" "subnet_1_private" {
   }
 }
 
-resource "aws_eip" "subnet_1_private_nat" {
+resource "aws_eip" "subnet_1_nat" {
   vpc = true
   depends_on = [
     "aws_internet_gateway.gateway"]
@@ -78,7 +78,7 @@ resource "aws_route_table" "subnet_1_private" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    nat_gateway_id = "${aws_nat_gateway.subnet_1_private.id}"
+    nat_gateway_id = "${aws_nat_gateway.subnet_1_public.id}"
   }
 
   tags {
@@ -127,9 +127,9 @@ resource "aws_subnet" "subnet_2_private" {
   }
 }
 
-resource "aws_nat_gateway" "subnet_2_private" {
-  subnet_id = "${aws_subnet.subnet_2_private.id}"
-  allocation_id = "${aws_eip.subnet_2_private_nat.id}"
+resource "aws_nat_gateway" "subnet_2_public" {
+  subnet_id = "${aws_subnet.subnet_2_public.id}"
+  allocation_id = "${aws_eip.subnet_2_nat.id}"
 
   depends_on = [
     "aws_internet_gateway.gateway"]
@@ -141,7 +141,7 @@ resource "aws_nat_gateway" "subnet_2_private" {
   }
 }
 
-resource "aws_eip" "subnet_2_private_nat" {
+resource "aws_eip" "subnet_2_nat" {
   vpc = true
   depends_on = [
     "aws_internet_gateway.gateway"]
@@ -152,7 +152,7 @@ resource "aws_route_table" "subnet_2_private" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    nat_gateway_id = "${aws_nat_gateway.subnet_2_private.id}"
+    nat_gateway_id = "${aws_nat_gateway.subnet_2_public.id}"
   }
 
   tags {
@@ -201,9 +201,9 @@ resource "aws_subnet" "subnet_3_private" {
   }
 }
 
-resource "aws_nat_gateway" "subnet_3_private" {
-  subnet_id = "${aws_subnet.subnet_3_private.id}"
-  allocation_id = "${aws_eip.subnet_3_private_nat.id}"
+resource "aws_nat_gateway" "subnet_3_public" {
+  subnet_id = "${aws_subnet.subnet_3_public.id}"
+  allocation_id = "${aws_eip.subnet_3_nat.id}"
 
   depends_on = [
     "aws_internet_gateway.gateway"]
@@ -215,7 +215,7 @@ resource "aws_nat_gateway" "subnet_3_private" {
   }
 }
 
-resource "aws_eip" "subnet_3_private_nat" {
+resource "aws_eip" "subnet_3_nat" {
   vpc = true
   depends_on = [
     "aws_internet_gateway.gateway"]
@@ -226,7 +226,7 @@ resource "aws_route_table" "subnet_3_private" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    nat_gateway_id = "${aws_nat_gateway.subnet_3_private.id}"
+    nat_gateway_id = "${aws_nat_gateway.subnet_3_public.id}"
   }
 
   tags {
@@ -257,6 +257,26 @@ resource "aws_subnet" "subnet_3_public" {
 resource "aws_route_table_association" "subnet_3_public" {
   route_table_id = "${aws_route_table.public.id}"
   subnet_id = "${aws_subnet.subnet_3_public.id}"
+}
+
+resource "aws_security_group" "loggly" {
+  vpc_id = "${aws_vpc.vpc.id}"
+  description = "Allow access to Loggly"
+  name = "${var.application_name}_${var.environment_name}_loggly"
+
+  egress {
+    from_port = 6514
+    protocol = "tcp"
+    to_port = 6514
+    cidr_blocks = [
+      "0.0.0.0/0"]
+  }
+
+  tags {
+    Name = "${var.application_name}_${var.environment_name}_loggly"
+    application_name = "${var.application_name}"
+    environment_name = "${var.environment_name}"
+  }
 }
 
 resource "aws_security_group" "ntp" {

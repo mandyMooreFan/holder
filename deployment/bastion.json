@@ -2,14 +2,13 @@
   "variables": {
     "application_name": "{{env `APPLICATION_NAME`}}",
     "aws_region": "us-east-1",
-    "loggly_token": "{{env `LOGGLY_TOKEN`}}",
-    "swarm_key": "{{env `SWARM_KEY`}}"
+    "loggly_token": "{{env `LOGGLY_TOKEN`}}"
   },
   "builders": [
     {
       "type": "amazon-ebs",
       "region": "{{user `aws_region`}}",
-      "ami_name": "{{user `application_name`}}_docker_swarm {{timestamp}}",
+      "ami_name": "{{user `application_name`}}_bastion {{timestamp}}",
       "source_ami_filter": {
         "filters": {
           "virtualization-type": "hvm",
@@ -32,11 +31,6 @@
       "destination": "/home/ubuntu/"
     },
     {
-      "type": "file",
-      "source": ".terraform/{{user `swarm_key`}}",
-      "destination": "/home/ubuntu/akka_boot.pem"
-    },
-    {
       "type": "shell",
       "inline": [
         "sudo apt-get update",
@@ -47,12 +41,7 @@
         "cd /etc/rsyslog.d/keys/ca.d/",
         "sudo curl -O https://logdog.loggly.com/media/logs-01.loggly.com_sha12.crt",
         "sudo sed -i \"s/LOGGLY_AUTH_TOKEN/{{user `loggly_token`}}/\" /etc/rsyslog.d/22-loggly.conf",
-        "sudo sed -i \"s/LOGGLY_TAG/bastion/\" /etc/rsyslog.d/22-loggly.conf",
-        "sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common",
-        "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
-        "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
-        "sudo apt-get update",
-        "sudo apt-get install docker-ce -y"
+        "sudo sed -i \"s/LOGGLY_TAG/bastion/\" /etc/rsyslog.d/22-loggly.conf"
       ]
     }
   ]

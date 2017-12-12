@@ -1,26 +1,78 @@
 version: "3"
+
+networks:
+  traefik:
+    driver: overlay
+
 services:
+  traefik:
+    image: traefik
+    command:
+      - --docker
+      - --docker.domain=traefik
+      - --docker.swarmmode
+      - --docker.watch
+      - --web
+      - --logLevel=DEBUG
+    ports:
+      - 80:80
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - traefik
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  loggly:
+    image: sendgridlabs/loggly-docker
+    environment:
+      LOGGLY_AUTH_TOKEN: "e75ce2e9-87b9-4033-910a-52c3a0f6f155"
+      LOGGLY_TAG: "akka-boot"
+    networks:
+      - traefik
+    deploy:
+      mode: global
+
   web:
     build: .
     image: wmfoody/akka-boot:latest
     environment:
       environment: development
-    ports:
-      - "80:80"
-      - "443:443"
-      - "81:81"
-      - "444:444"
-    deploy:
-      replicas: 2
-      restart_policy:
-        condition: on-failure
-      placement:
-        constraints: [node.role == worker]
-
-  loggly:
-    image: sendgridlabs/loggly-docker
-    environment:
-      LOGGLY_AUTH_TOKEN: "FILL_ME_IN"
-      LOGGLY_TAG: "akka-boot"
+    networks:
+      - traefik
     deploy:
       mode: global
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.port=80"
+        - "traefik.backend=web"
+        - "traefik.docker.network=traefik"
+        - "traefik.frontend.rule=PathPrefixStrip:/yo"
+
+  whoami:
+    image: emilevauge/whoami
+    networks:
+      - traefik
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.port=80"
+        - "traefik.backend=whoami"
+        - "traefik.docker.network=traefik"
+        - "traefik.frontend.rule=PathPrefix:/whoami"
+
+  whoareyou:
+    image: emilevauge/whoami
+    networks:
+      - traefik
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.port=80"
+        - "traefik.backend=whoareyou"
+        - "traefik.docker.network=traefik"
+        - "traefik.frontend.rule=PathPrefix:/whoareyou"

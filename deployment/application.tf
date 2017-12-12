@@ -1,16 +1,10 @@
-variable "aws_access_key" {
-  type = "string"
-  default = "AKIAIE4EEVHETKPHDWLQ"
-}
-
-variable "aws_secret_key" {
-  type = "string"
-  default = "cAtCHekek9XfOQ3i5ZKEwfH/oUk6s1JnWQVcZ4j6"
-}
-
 variable "aws_region" {
   type = "string"
   default = "us-east-1"
+}
+
+provider "aws" {
+  region = "${var.aws_region}"
 }
 
 variable "az_1" {
@@ -28,62 +22,64 @@ variable "az_3" {
   default = "us-east-1c"
 }
 
-provider "aws" {
-  access_key = "${var.aws_access_key}"
-  secret_key = "${var.aws_secret_key}"
-  region = "${var.aws_region}"
-}
-
 variable "application_name" {
   type = "string"
-  default = "akka_boot"
 }
 
 variable "environment_name" {
   type = "string"
-  default = "dev"
+}
+
+variable "logs_bucket" {
+  type = "string"
 }
 
 variable "key_name" {
   type = "string"
-  default = "akka_boot"
 }
 
-variable "bastion_key_name" {
+variable "bastion_instance_type" {
   type = "string"
-  default = "akka_boot"
+  default = "t2.micro"
 }
 
-variable "swarm_key_name" {
-  type = "string"
-  default = "akka_boot"
-}
-
-variable "swarm_ami" {
-  type = "string"
-}
-
-variable "swarm_instance_type" {
+variable "swarm_manager_instance_type" {
   type = "string"
   default = "t2.medium"
 }
 
-data "aws_ami" "ubuntu" {
-  most_recent = true
+variable "swarm_node_instance_type" {
+  type = "string"
+  default = "t2.medium"
+}
 
-  filter {
-    name = "name"
-    values = [
-      "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*"]
-  }
+variable "docker_username" {
+  type = "string"
+  description = "Username for Docker Hub"
+}
 
-  filter {
-    name = "virtualization-type"
-    values = [
-      "hvm"]
-  }
+variable "docker_password" {
+  type = "string"
+  description = "Password for Docker Hub"
+}
 
-  owners = [
-    "099720109477"]
+resource "aws_s3_bucket" "logs" {
+  bucket = "${var.logs_bucket}"
+  acl = "private"
 
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::127311923021:root"
+      },
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::${var.logs_bucket}/${var.application_name}/${var.environment_name}/elbs/*"
+    }
+  ]
+}
+EOF
 }

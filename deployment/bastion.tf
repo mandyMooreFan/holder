@@ -35,17 +35,38 @@ resource "aws_autoscaling_group" "bastion" {
 
 resource "aws_launch_configuration" "bastion" {
   name_prefix = "${var.application_name}_${var.environment_name}_bastion_"
-  image_id = "${data.aws_ami.ubuntu.id}"
-  instance_type = "t2.micro"
-  key_name = "${var.bastion_key_name}"
+  image_id = "${data.aws_ami.bastion.id}"
+  instance_type = "${var.bastion_instance_type}"
+  key_name = "${var.key_name}"
 
   security_groups = [
+    "${aws_security_group.loggly.id}",
     "${aws_security_group.ntp.id}",
     "${aws_security_group.bastion.id}"]
 
   lifecycle {
     create_before_destroy = true
   }
+}
+
+data "aws_ami" "bastion" {
+  most_recent = true
+
+  filter {
+    name = "name"
+    values = [
+      "${var.application_name}_bastion*"]
+  }
+
+  filter {
+    name = "virtualization-type"
+    values = [
+      "hvm"]
+  }
+
+  owners = [
+    "self"]
+
 }
 
 resource "aws_security_group" "bastion" {
@@ -86,14 +107,6 @@ resource "aws_security_group" "ssh" {
     from_port = 22
     protocol = "tcp"
     to_port = 22
-    security_groups = [
-      "${aws_security_group.bastion.id}"]
-  }
-
-  egress {
-    from_port = 22
-    to_port = 22
-    protocol = "tcp"
     security_groups = [
       "${aws_security_group.bastion.id}"]
   }

@@ -32,8 +32,9 @@ jobs:
       - save_cache:
           paths:
             - ~/.ivy2
+            - ~/.m2
             - ~/.sbt
-          key: v1-dependencies--{{ checksum "build.sbt" }}
+          key: v1-dependencies-{{ checksum "build.sbt" }}
 
       # run tests!
       - run: cat /dev/null | sbt test:test
@@ -50,3 +51,92 @@ jobs:
 
       - store-artifacts:
           path: ~/test-reports/
+
+  deploy_environment:
+    machine:
+      docker_layer_caching: true
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - terraform
+
+      - run: bash bin/deploy_environment.sh
+
+      - store-artifacts:
+          path: deployment/.terraform/
+
+      - save_cache:
+          paths:
+            - deployment/.terraform
+          key: terraform
+
+  destroy_environment:
+    machine:
+      docker_layer_caching: true
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - terraform
+
+      - run: bash bin/destroy_environment.sh
+
+      - store-artifacts:
+          path: deployment/.terraform/
+
+      - save_cache:
+          paths:
+            - deployment/.terraform
+          key: terraform
+
+  deploy_application:
+    machine:
+      docker_layer_caching: true
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - terraform
+            - v1-dependencies-{{ checksum "build.sbt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - run: bash bin/deploy_application.sh dev
+
+      - save_cache:
+          paths:
+            - ~/.ivy2
+            - ~/.m2
+            - ~/.sbt
+          key: v1-dependencies-{{ checksum "build.sbt" }}
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build
+      - deploy_environment:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+      - deploy_application:
+          requires:
+            - deploy_environment
+          filters:
+            branches:
+              only: master
