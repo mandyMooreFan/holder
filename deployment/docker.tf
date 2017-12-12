@@ -102,7 +102,7 @@ resource "aws_security_group" "swarm_elb" {
 
 }
 
-resource "aws_instance" "swarm_manager" {
+resource "aws_instance" "swarm_manager_prod" {
   ami = "${data.aws_ami.swarm.id}"
   instance_type = "${var.swarm_manager_instance_type}"
   subnet_id = "${aws_subnet.subnet_1_private.id}"
@@ -122,6 +122,28 @@ resource "aws_instance" "swarm_manager" {
   }
 }
 
+resource "aws_spot_instance_request" "swarm_manager_dev" {
+  ami = "${data.aws_ami.swarm.id}"
+  instance_type = "${var.swarm_manager_instance_type}"
+  subnet_id = "${aws_subnet.subnet_1_private.id}"
+  user_data = "${data.template_file.swarm_manager_user_data.rendered}"
+  key_name = "${var.key_name}"
+
+  spot_price = "0.13"
+  wait_for_fulfillment = true
+
+  vpc_security_group_ids = [
+    "${aws_security_group.loggly.id}",
+    "${aws_security_group.ntp.id}",
+    "${aws_security_group.ssh.id}",
+    "${aws_security_group.swarm_node.id}"]
+
+  tags {
+    Name = "${var.application_name}_${var.environment_name}_swarm_manager_${count.index}"
+    application_name = "${var.application_name}"
+    environment_name = "${var.environment_name}"
+  }
+}
 data "aws_ami" "swarm" {
   most_recent = true
 
@@ -226,7 +248,7 @@ data "template_file" "swarm_worker_user_data" {
   vars {
     docker_username = "${var.docker_username}"
     docker_password = "${var.docker_password}"
-    swarm_manager_private_ip = "${aws_instance.swarm_manager.private_ip}"
+    swarm_manager_private_ip = "${var.environment_name == "dev" ? aws_spot_instance_request.swarm_manager_dev.private_ip : aws_instance.swarm_manager_prod.private_ip}"
   }
 }
 
