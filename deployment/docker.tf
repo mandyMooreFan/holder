@@ -103,6 +103,9 @@ resource "aws_security_group" "swarm_elb" {
 }
 
 resource "aws_instance" "swarm_manager_prod" {
+  # Only launch this in prod
+  count = "${var.environment_name == "dev" ? 0 : 1}"
+
   ami = "${data.aws_ami.swarm.id}"
   instance_type = "${var.swarm_manager_instance_type}"
   subnet_id = "${aws_subnet.subnet_1_private.id}"
@@ -123,6 +126,9 @@ resource "aws_instance" "swarm_manager_prod" {
 }
 
 resource "aws_spot_instance_request" "swarm_manager_dev" {
+  # Only launch this in dev
+  count = "${var.environment_name == "dev" ? 1 : 0}"
+
   ami = "${data.aws_ami.swarm.id}"
   instance_type = "${var.swarm_manager_instance_type}"
   subnet_id = "${aws_subnet.subnet_1_private.id}"
@@ -211,6 +217,8 @@ resource "aws_launch_configuration" "swarm_worker_dev" {
   instance_type = "${var.swarm_node_instance_type}"
   user_data = "${data.template_file.swarm_worker_user_data.rendered}"
   key_name = "${var.key_name}"
+
+  # Run spot instances in dev
   spot_price = "0.13"
 
   security_groups = [
