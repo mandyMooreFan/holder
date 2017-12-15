@@ -8,6 +8,11 @@ PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../ && pwd )"
 
 DEPLOYMENT_DIR="${PROJECT_DIR}/deployment/"
 
+if [ -z "${AWS_ACCOUNT_ID}" ]; then
+    echo "You must set the AWS_ACCOUNT_ID environment variable."
+    exit 0;
+fi
+
 if [ -z "${AWS_ACCESS_KEY_ID}" ]; then
     echo "You must set the AWS_ACCESS_KEY_ID environment variable."
     exit 0;
@@ -39,6 +44,7 @@ docker run -i \
     -w /app/deployment/ \
     -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
     -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+    -e TF_VAR_aws_account_id=${AWS_ACCOUNT_ID} \
     -e TF_VAR_application_name=${APPLICATION_NAME} \
     -e TF_VAR_environment_name=${ENVIRONMENT_NAME} \
     -e TF_VAR_docker_username=${DOCKER_USERNAME} \

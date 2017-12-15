@@ -142,7 +142,9 @@ function deploy_to_aws_swarm {
         -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
         -it cgswong/aws aws ec2 describe-instances \
         --region us-east-1 \
-        --filters "Name=tag:Name,Values=${APPLICATION_NAME}_${ENVIRONMENT_NAME}_bastion" \
+        --filters \
+            "Name=tag:Name,Values=${APPLICATION_NAME}_${ENVIRONMENT_NAME}_bastion" \
+            "Name=instance-state-name,Values=running" \
         --query "Reservations[*].Instances[*].[PublicIpAddress]" \
         --output=text)
     echo "Connecting to Bastion: ${BASTION}"
@@ -152,7 +154,9 @@ function deploy_to_aws_swarm {
         -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
         -it cgswong/aws aws ec2 describe-instances \
         --region us-east-1 \
-        --filters "Name=tag:Name,Values=${APPLICATION_NAME}_${ENVIRONMENT_NAME}_swarm_manager_0" \
+        --filters \
+            "Name=tag:Name,Values=${APPLICATION_NAME}_${ENVIRONMENT_NAME}_swarm_manager" \
+            "Name=instance-state-name,Values=running" \
         --query "Reservations[*].Instances[*].[PrivateIpAddress]" \
         --output=text)
     echo "Connecting to Swarm Manager: ${SWARM_MANAGER}"
