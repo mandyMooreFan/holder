@@ -63,7 +63,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - terraform
+            - terraform-001
 
       - run: bash bin/deploy_environment.sh
 
@@ -73,7 +73,7 @@ jobs:
       - save_cache:
           paths:
             - deployment/.terraform
-          key: terraform
+          key: terraform-001
 
   destroy_environment:
     machine:
