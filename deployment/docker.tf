@@ -254,6 +254,8 @@ data "template_file" "swarm_manager_user_data" {
 }
 
 resource "aws_autoscaling_group" "swarm_workers" {
+  depends_on = ["aws_autoscaling_group.swarm_managers"]
+
   name = "${var.application_name}_${var.environment_name}_swarm_workers"
   launch_configuration = "${var.environment_name == "dev" ? aws_launch_configuration.swarm_worker_dev.name : aws_launch_configuration.swarm_worker_prod.name}"
   min_size = 1

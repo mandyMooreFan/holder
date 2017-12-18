@@ -70,29 +70,55 @@ if [ ! -e "${PRIVATE_KEY}" ]; then
         -w /app/deployment/.terraform/ \
         -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
         -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
-        -it cgswong/aws aws ec2 import-key-pair --region us-east-1 --key-name "${KEY_PAIR_NAME}" --public-key-material file:///app/deployment/.terraform/$KEY_PAIR_NAME.pub
+        -it cgswong/aws aws ec2 import-key-pair \
+            --region us-east-1 \
+            --key-name "${KEY_PAIR_NAME}" \
+            --public-key-material file:///app/deployment/.terraform/$KEY_PAIR_NAME.pub
+fi
+
+BUCKET_EXISTS=$(docker run \
+    -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+    -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+    -it cgswong/aws aws s3api head-bucket \
+        --region us-east-1 \
+        --bucket ${LOGS_BUCKET})
+
+if [ -z "${BUCKET_EXISTS}" ]; then
+    echo "Bucket ${LOGS_BUCKET} already exists"
+else
+    echo "Bucket ${LOGS_BUCKET} does not exist. Creating."
+
+    docker run \
+        -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+        -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+        -it cgswong/aws aws s3api create-bucket \
+            --region us-east-1 \
+            --acl private \
+            --bucket ${LOGS_BUCKET}
+
+    echo "Bucket ${LOGS_BUCKET} created."
 fi
 
 # Build the AMI for the Bastion Server
-docker run \
-    -v "${PROJECT_DIR}:/app/" \
-    -w /app/deployment/ \
-    -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
-    -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
-    -e APPLICATION_NAME=${APPLICATION_NAME} \
-    -e LOGGLY_TOKEN=${LOGGLY_TOKEN} \
-    -it hashicorp/packer:light build bastion.json
+#docker run \
+#    -v "${PROJECT_DIR}:/app/" \
+#    -w /app/deployment/ \
+#    -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+#    -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+#    -e APPLICATION_NAME=${APPLICATION_NAME} \
+#    -e LOGGLY_TOKEN=${LOGGLY_TOKEN} \
+#    -it hashicorp/packer:light build bastion.json
 
 # Build the AMI for the Docker Swarm nodes
-docker run \
-    -v "$PROJECT_DIR:/app/" \
-    -w /app/deployment/ \
-    -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
-    -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
-    -e APPLICATION_NAME=${APPLICATION_NAME} \
-    -e LOGGLY_TOKEN=${LOGGLY_TOKEN} \
-    -e SWARM_KEY=${KEY_PAIR_NAME} \
-    -it hashicorp/packer:light build docker.json
+#docker run \
+#    -v "$PROJECT_DIR:/app/" \
+#    -w /app/deployment/ \
+#    -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+#    -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+#    -e APPLICATION_NAME=${APPLICATION_NAME} \
+#    -e LOGGLY_TOKEN=${LOGGLY_TOKEN} \
+#    -e SWARM_KEY=${KEY_PAIR_NAME} \
+#    -it hashicorp/packer:light build docker.json
 
 # Initialize Terraform
 docker run \
@@ -100,9 +126,11 @@ docker run \
     -w /app/deployment/ \
     -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
     -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
-    -it hashicorp/terraform:light init
+    -it hashicorp/terraform:light init \
+        -backend-config="bucket=$LOGS_BUCKET" \
+        -backend-config="key=$APPLICATION_NAME/$ENVIRONMENT_NAME/terraform.tfstate" \
+        -backend-config="region=us-east-1"
 
-# TODO This path needs to be relative to the working directory inside the docker container. Oops!!!
 TERRAFORM_STATE=".terraform/${ENVIRONMENT_NAME}.tfstate"
 
 echo "Terraform state saved in $TERRAFORM_STATE"

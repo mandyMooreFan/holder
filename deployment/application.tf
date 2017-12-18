@@ -1,3 +1,8 @@
+terraform {
+  backend "s3" {
+  }
+}
+
 variable "aws_account_id" {
   type = "string"
 }
