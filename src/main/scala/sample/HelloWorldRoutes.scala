@@ -17,7 +17,7 @@ class HelloWorldRoutes(system: ActorSystem, executionContext: ExecutionContext)
           if (fail.isDefined) {
             throw new Exception("Something bad always happened")
           } else {
-            "Hello Worlds"
+            "Hello World"
           }
         }
       }
