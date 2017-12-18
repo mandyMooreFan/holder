@@ -19,7 +19,7 @@ class HelloWorldRoutesTest extends WordSpec with Matchers with ScalatestRouteTes
   "GET /hellos" should {
     "return Hello World" in {
       Get("/hellos") ~> route ~> check {
-        responseAs[String] should ===(""""Hello Worlds"""")
+        responseAs[String] should ===(""""Hello World"""")
       }
     }
   }

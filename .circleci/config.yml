@@ -63,7 +63,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - terraform
+            - terraform-003
 
       - run: bash bin/deploy_environment.sh
 
@@ -73,7 +73,7 @@ jobs:
       - save_cache:
           paths:
             - deployment/.terraform
-          key: terraform
+          key: terraform-003
 
   destroy_environment:
     machine:
@@ -86,7 +86,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - terraform
+            - terraform-003
 
       - run: bash bin/destroy_environment.sh
 
@@ -96,7 +96,7 @@ jobs:
       - save_cache:
           paths:
             - deployment/.terraform
-          key: terraform
+          key: terraform-003
 
   deploy_application:
     machine:
@@ -109,7 +109,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - terraform
+            - terraform-003
             - v1-dependencies-{{ checksum "build.sbt" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-

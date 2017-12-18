@@ -32,27 +32,24 @@
       "destination": "/home/ubuntu/"
     },
     {
-      "type": "file",
-      "source": ".terraform/{{user `swarm_key`}}",
-      "destination": "/home/ubuntu/akka_boot.pem"
-    },
-    {
       "type": "shell",
       "inline": [
+        "export DEBIAN_FRONTEND=noninteractive",
+        "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
+        "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
         "sudo apt-get update",
-        "sudo apt-get upgrade -y",
-        "sudo apt-get install rsyslog-gnutls",
+        "sudo apt-get install -y rsyslog-gnutls",
         "sudo mkdir -pv /etc/rsyslog.d/keys/ca.d",
         "sudo mv /home/ubuntu/22-loggly.conf /etc/rsyslog.d/",
         "cd /etc/rsyslog.d/keys/ca.d/",
         "sudo curl -O https://logdog.loggly.com/media/logs-01.loggly.com_sha12.crt",
         "sudo sed -i \"s/LOGGLY_AUTH_TOKEN/{{user `loggly_token`}}/\" /etc/rsyslog.d/22-loggly.conf",
         "sudo sed -i \"s/LOGGLY_TAG/bastion/\" /etc/rsyslog.d/22-loggly.conf",
-        "sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common",
-        "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
-        "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
-        "sudo apt-get update",
-        "sudo apt-get install docker-ce -y"
+        "sudo -E apt-get install -y apt-transport-https ca-certificates curl software-properties-common",
+        "sudo -E apt-get install -y docker-ce",
+        "sudo -E apt-get install -y python-pip",
+        "sudo -E apt-get upgrade -y",
+        "sudo pip install awscli"
       ]
     }
   ]

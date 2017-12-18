@@ -102,24 +102,124 @@ resource "aws_security_group" "swarm_elb" {
 
 }
 
-resource "aws_instance" "swarm_manager" {
-  ami = "${data.aws_ami.swarm.id}"
-  instance_type = "${var.swarm_manager_instance_type}"
-  subnet_id = "${aws_subnet.subnet_1_private.id}"
+resource "aws_autoscaling_group" "swarm_managers" {
+  name = "${var.application_name}_${var.environment_name}_swarm_managers"
+  launch_configuration = "${var.environment_name == "dev" ? aws_launch_configuration.swarm_manager_dev.name : aws_launch_configuration.swarm_manager_prod.name}"
+  min_size = 1
+  max_size = 1
+  desired_capacity = 1
+  load_balancers = [
+    "${aws_elb.swarm_http.id}"]
+
+  vpc_zone_identifier = [
+    "${aws_subnet.subnet_1_private.id}",
+    "${aws_subnet.subnet_2_private.id}",
+    "${aws_subnet.subnet_3_private.id}"]
+
+  tag {
+    key = "Name"
+    propagate_at_launch = true
+    value = "${var.application_name}_${var.environment_name}_swarm_manager"
+  }
+
+  tag {
+    key = "application_name"
+    propagate_at_launch = true
+    value = "${var.application_name}"
+  }
+
+  tag {
+    key = "environment_name"
+    propagate_at_launch = true
+    value = "${var.environment_name}"
+  }
+}
+
+resource "aws_launch_configuration" "swarm_manager_dev" {
+  name_prefix = "${var.application_name}_${var.environment_name}_swarm_manager_"
+  image_id = "${data.aws_ami.swarm.id}"
+  instance_type = "${var.swarm_node_instance_type}"
   user_data = "${data.template_file.swarm_manager_user_data.rendered}"
   key_name = "${var.key_name}"
+  iam_instance_profile = "${aws_iam_instance_profile.swarm_manager.id}"
 
-  vpc_security_group_ids = [
+  # Run spot instances in dev
+  spot_price = "0.13"
+
+  security_groups = [
     "${aws_security_group.loggly.id}",
     "${aws_security_group.ntp.id}",
     "${aws_security_group.ssh.id}",
     "${aws_security_group.swarm_node.id}"]
 
-  tags {
-    Name = "${var.application_name}_${var.environment_name}_swarm_manager_${count.index}"
-    application_name = "${var.application_name}"
-    environment_name = "${var.environment_name}"
+  lifecycle {
+    create_before_destroy = true
   }
+}
+
+resource "aws_launch_configuration" "swarm_manager_prod" {
+  name_prefix = "${var.application_name}_${var.environment_name}_swarm_manager_"
+  image_id = "${data.aws_ami.swarm.id}"
+  instance_type = "${var.swarm_node_instance_type}"
+  user_data = "${data.template_file.swarm_manager_user_data.rendered}"
+  key_name = "${var.key_name}"
+  iam_instance_profile = "${aws_iam_instance_profile.swarm_manager.id}"
+
+  security_groups = [
+    "${aws_security_group.loggly.id}",
+    "${aws_security_group.ntp.id}",
+    "${aws_security_group.ssh.id}",
+    "${aws_security_group.swarm_node.id}"]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_iam_instance_profile" "swarm_manager" {
+  name = "${var.application_name}_${var.environment_name}_swarm_manager"
+  role = "${aws_iam_role.swarm_manager.id}"
+}
+
+resource "aws_iam_role" "swarm_manager" {
+  name = "${var.application_name}_${var.environment_name}_swarm_manager"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "swarm_manager_ssm" {
+  role = "${aws_iam_role.swarm_manager.id}"
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ssm:DescribeParameters",
+        "ssm:PutParameter",
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:DeleteParameter"
+      ],
+      "Resource": "arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:parameter/${var.application_name}/${var.environment_name}/swarm/*"
+    }
+  ]
+}
+EOF
 }
 
 data "aws_ami" "swarm" {
@@ -145,14 +245,19 @@ data "template_file" "swarm_manager_user_data" {
   template = "${file("docker_swarm_manager.sh")}"
 
   vars {
+    aws_region = "${var.aws_region}"
     docker_username = "${var.docker_username}"
     docker_password = "${var.docker_password}"
+    application_name = "${var.application_name}"
+    environment_name = "${var.environment_name}"
   }
 }
 
 resource "aws_autoscaling_group" "swarm_workers" {
+  depends_on = ["aws_autoscaling_group.swarm_managers"]
+
   name = "${var.application_name}_${var.environment_name}_swarm_workers"
-  launch_configuration = "${aws_launch_configuration.swarm_worker.name}"
+  launch_configuration = "${var.environment_name == "dev" ? aws_launch_configuration.swarm_worker_dev.name : aws_launch_configuration.swarm_worker_prod.name}"
   min_size = 1
   max_size = 3
   desired_capacity = 2
@@ -183,12 +288,16 @@ resource "aws_autoscaling_group" "swarm_workers" {
   }
 }
 
-resource "aws_launch_configuration" "swarm_worker" {
+resource "aws_launch_configuration" "swarm_worker_dev" {
   name_prefix = "${var.application_name}_${var.environment_name}_swarm_worker_"
   image_id = "${data.aws_ami.swarm.id}"
   instance_type = "${var.swarm_node_instance_type}"
   user_data = "${data.template_file.swarm_worker_user_data.rendered}"
   key_name = "${var.key_name}"
+  iam_instance_profile = "${aws_iam_instance_profile.swarm_worker.id}"
+
+  # Run spot instances in dev
+  spot_price = "0.13"
 
   security_groups = [
     "${aws_security_group.loggly.id}",
@@ -201,13 +310,77 @@ resource "aws_launch_configuration" "swarm_worker" {
   }
 }
 
+resource "aws_launch_configuration" "swarm_worker_prod" {
+  name_prefix = "${var.application_name}_${var.environment_name}_swarm_worker_"
+  image_id = "${data.aws_ami.swarm.id}"
+  instance_type = "${var.swarm_node_instance_type}"
+  user_data = "${data.template_file.swarm_worker_user_data.rendered}"
+  key_name = "${var.key_name}"
+  iam_instance_profile = "${aws_iam_instance_profile.swarm_worker.id}"
+
+  security_groups = [
+    "${aws_security_group.loggly.id}",
+    "${aws_security_group.ntp.id}",
+    "${aws_security_group.ssh.id}",
+    "${aws_security_group.swarm_node.id}"]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_iam_instance_profile" "swarm_worker" {
+  name = "${var.application_name}_${var.environment_name}_swarm_worker"
+  role = "${aws_iam_role.swarm_worker.id}"
+}
+
+resource "aws_iam_role" "swarm_worker" {
+  name = "${var.application_name}_${var.environment_name}_swarm_worker"
+  path = "/"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "swarm_worker_ssm" {
+  role = "${aws_iam_role.swarm_worker.id}"
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ssm:GetParameter"
+      ],
+      "Resource": ["arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:parameter/${var.application_name}/${var.environment_name}/swarm/managers/*"]
+    }
+  ]
+}
+EOF
+}
+
 data "template_file" "swarm_worker_user_data" {
   template = "${file("docker_swarm_worker.sh")}"
 
   vars {
+    aws_region = "${var.aws_region}"
     docker_username = "${var.docker_username}"
     docker_password = "${var.docker_password}"
-    swarm_manager_private_ip = "${aws_instance.swarm_manager.private_ip}"
+    application_name = "${var.application_name}"
+    environment_name = "${var.environment_name}"
   }
 }
 
@@ -222,26 +395,6 @@ resource "aws_security_group" "swarm_node" {
     environment_name = "${var.environment_name}"
   }
 
-}
-
-# Allow internal SSH traffic. In particular to retrieve the Swarm TOKEN.
-resource "aws_security_group_rule" "swarm_ssh_in" {
-  security_group_id = "${aws_security_group.swarm_node.id}"
-  type = "ingress"
-  from_port = 22
-  protocol = "tcp"
-  to_port = 22
-  self = true
-}
-
-# Allow internal SSH traffic. In particular to retrieve the Swarm TOKEN.
-resource "aws_security_group_rule" "swarm_ssh_out" {
-  security_group_id = "${aws_security_group.swarm_node.id}"
-  type = "egress"
-  from_port = 22
-  protocol = "tcp"
-  to_port = 22
-  self = true
 }
 
 # Allow inbound HTTP trafic from the ELB. This is how content actually gets served.

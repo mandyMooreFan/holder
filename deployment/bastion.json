@@ -33,15 +33,16 @@
     {
       "type": "shell",
       "inline": [
+        "export DEBIAN_FRONTEND=noninteractive",
         "sudo apt-get update",
-        "sudo apt-get upgrade -y",
-        "sudo apt-get install rsyslog-gnutls",
+        "sudo -E apt-get install -y rsyslog-gnutls",
         "sudo mkdir -pv /etc/rsyslog.d/keys/ca.d",
         "sudo mv /home/ubuntu/22-loggly.conf /etc/rsyslog.d/",
         "cd /etc/rsyslog.d/keys/ca.d/",
         "sudo curl -O https://logdog.loggly.com/media/logs-01.loggly.com_sha12.crt",
         "sudo sed -i \"s/LOGGLY_AUTH_TOKEN/{{user `loggly_token`}}/\" /etc/rsyslog.d/22-loggly.conf",
-        "sudo sed -i \"s/LOGGLY_TAG/bastion/\" /etc/rsyslog.d/22-loggly.conf"
+        "sudo sed -i \"s/LOGGLY_TAG/bastion/\" /etc/rsyslog.d/22-loggly.conf",
+        "sudo -E apt-get upgrade -y"
       ]
     }
   ]

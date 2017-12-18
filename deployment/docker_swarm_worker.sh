@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
-chmod 400 /home/ubuntu/akka_boot.pem
+SWARM_MANAGER=$(aws ssm get-parameter \
+    --region ${aws_region} \
+    --name /${application_name}/${environment_name}/swarm/managers/ip_address \
+    --query "Parameter.Value" \
+    --output text)
 
-sudo scp -o StrictHostKeyChecking=no \
-    -o NoHostAuthenticationForLocalhost=yes \
-    -o UserKnownHostsFile=/dev/null \
-    -i /home/ubuntu/akka_boot.pem \
-    ubuntu@${swarm_manager_private_ip}:/home/ubuntu/token /home/ubuntu/token
+TOKEN=$(aws ssm get-parameter \
+    --region ${aws_region} \
+    --name /${application_name}/${environment_name}/swarm/managers/worker_token \
+    --query "Parameter.Value" \
+    --output text)
 
-sudo docker swarm join --token $(cat /home/ubuntu/token) ${swarm_manager_private_ip}:2377
+sudo docker swarm join --token $TOKEN $SWARM_MANAGER:2377
 
 sudo docker login -u ${docker_username} -p ${docker_password}

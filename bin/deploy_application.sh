@@ -137,12 +137,31 @@ function deploy_to_local_swarm {
 }
 
 function deploy_to_aws_swarm {
+    KEY="${PROJECT_DIR}/deployment/.terraform/${KEY_PAIR_NAME}"
+
+    docker run \
+        -v "${PROJECT_DIR}:/app/" \
+        -w /app/deployment/.terraform/ \
+        -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+        -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+        -it cgswong/aws aws ssm get-parameter \
+            --region us-east-1 \
+            --name /${APPLICATION_NAME}/${ENVIRONMENT_NAME}/swarm/admin/private_key \
+            --with-decryption \
+            --query "Parameter.Value" \
+            --output text \
+            > ${KEY}
+
+    chmod 700 ${KEY}
+
     BASTION=$(docker run \
         -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
         -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
         -it cgswong/aws aws ec2 describe-instances \
         --region us-east-1 \
-        --filters "Name=tag:Name,Values=${APPLICATION_NAME}_${ENVIRONMENT_NAME}_bastion" \
+        --filters \
+            "Name=tag:Name,Values=${APPLICATION_NAME}_${ENVIRONMENT_NAME}_bastion" \
+            "Name=instance-state-name,Values=running" \
         --query "Reservations[*].Instances[*].[PublicIpAddress]" \
         --output=text)
     echo "Connecting to Bastion: ${BASTION}"
@@ -152,12 +171,13 @@ function deploy_to_aws_swarm {
         -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
         -it cgswong/aws aws ec2 describe-instances \
         --region us-east-1 \
-        --filters "Name=tag:Name,Values=${APPLICATION_NAME}_${ENVIRONMENT_NAME}_swarm_manager_0" \
+        --filters \
+            "Name=tag:Name,Values=${APPLICATION_NAME}_${ENVIRONMENT_NAME}_swarm_manager" \
+            "Name=instance-state-name,Values=running" \
         --query "Reservations[*].Instances[*].[PrivateIpAddress]" \
         --output=text)
     echo "Connecting to Swarm Manager: ${SWARM_MANAGER}"
 
-    KEY="${PROJECT_DIR}/deployment/.terraform/${KEY_PAIR_NAME}"
     PROXY="ProxyCommand ssh -i $PROJECT_DIR/deployment/.terraform/$KEY_PAIR_NAME ubuntu@$BASTION nc $SWARM_MANAGER 22"
 
     scp -i "${KEY}" -o "${PROXY}" \
