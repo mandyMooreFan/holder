@@ -196,6 +196,6 @@ mkdir -p "${PROJECT_DIR}/deployment/.terraform"
 
 get_or_create_key_pair
 create_s3_bucket
-#build_bastion_ami
-#build_docker_ami
+build_bastion_ami
+build_docker_ami
 apply_terraform
