@@ -152,6 +152,8 @@ function deploy_to_aws_swarm {
             --output text \
             > ${KEY}
 
+    chmod 700 ${KEY}
+
     BASTION=$(docker run \
         -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
         -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
