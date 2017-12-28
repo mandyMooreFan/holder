@@ -83,7 +83,7 @@ resource "aws_s3_bucket" "logs" {
     {
       "Effect": "Allow",
       "Principal": {
-        "AWS": "arn:aws:iam::127311923021:root"
+        "AWS": "arn:aws:iam::${var.aws_account_id}:root"
       },
       "Action": "s3:PutObject",
       "Resource": "arn:aws:s3:::${var.logs_bucket}/${var.application_name}/${var.environment_name}/elbs/*"
