@@ -81,12 +81,12 @@ resource "aws_s3_bucket" "logs" {
   "Version": "2012-10-17",
   "Statement": [
     {
+      "Action": ["s3:PutObject"],
       "Effect": "Allow",
+      "Resource": "arn:aws:s3:::${var.logs_bucket}/${var.application_name}/${var.environment_name}/elbs/AWSLogs/${var.aws_account_id}/*",
       "Principal": {
-        "AWS": "arn:aws:iam::${var.aws_account_id}:root"
-      },
-      "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::${var.logs_bucket}/${var.application_name}/${var.environment_name}/elbs/*"
+        "AWS": ["127311923021"]
+      }
     }
   ]
 }
