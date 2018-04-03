@@ -28,11 +28,11 @@ resource "aws_elb" "swarm_http" {
     target = "HTTP:8080/dashboard/"
   }
 
-  access_logs {
-    bucket = "${var.logs_bucket}"
-    bucket_prefix = "${var.application_name}/${var.environment_name}/elbs/swarm"
-    interval = 5
-  }
+  //  access_logs {
+  //    bucket = "${var.logs_bucket}"
+  //    bucket_prefix = "${var.application_name}/${var.environment_name}/elbs/swarm"
+  //    interval = 5
+  //  }
 
   tags {
     Name = "${var.application_name}_${var.environment_name}_swarm_http"

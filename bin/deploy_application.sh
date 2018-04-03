@@ -178,15 +178,15 @@ function deploy_to_aws_swarm {
         --output=text)
     echo "Connecting to Swarm Manager: ${SWARM_MANAGER}"
 
-    PROXY="ProxyCommand ssh -i $PROJECT_DIR/deployment/.terraform/$KEY_PAIR_NAME ubuntu@$BASTION nc $SWARM_MANAGER 22"
+    SWARM_MANAGER_PROXY="ProxyCommand ssh -i $PROJECT_DIR/deployment/.terraform/$KEY_PAIR_NAME ubuntu@$BASTION nc $SWARM_MANAGER 22"
 
-    scp -i "${KEY}" -o "${PROXY}" \
+    scp -i "${KEY}" -o "${SWARM_MANAGER_PROXY}" \
         ${PROJECT_DIR}/docker-compose.yml ubuntu@${SWARM_MANAGER}:/home/ubuntu/
 
-    ssh -i "${KEY}" -o "${PROXY}" \
+    ssh -i "${KEY}" -o "${SWARM_MANAGER_PROXY}" \
         -t ubuntu@${SWARM_MANAGER} "sudo docker stack deploy -c docker-compose.yml ${APPLICATION_NAME}"
 
-    ssh -i "${KEY}" -o "${PROXY}" \
+    ssh -i "${KEY}" -o "${SWARM_MANAGER_PROXY}" \
         -t ubuntu@${SWARM_MANAGER} 'sudo docker service ls'
 }
 
