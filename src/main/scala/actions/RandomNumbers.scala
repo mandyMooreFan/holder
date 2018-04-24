@@ -1,12 +1,17 @@
 package actions
 
-class RandomNumbers {
+import java.util.Random
+
+object RandomNumbers {
+
+  private val rand = new Random()
 
   def roll20(): Int = {
-    ???
+    rand.nextInt(20) + 1
   }
 
-  def coinFlip(): Int = {
-    ???
+  def coinFlip(): Boolean = {
+    rand.nextBoolean()
   }
+
 }
