@@ -1,4 +1,4 @@
-package baseball
+package game
 
 object Field {
 
