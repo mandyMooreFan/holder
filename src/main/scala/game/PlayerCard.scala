@@ -1,4 +1,4 @@
-package baseball
+package game
 
 case class PlayerCard(uuid: String, name: String, pitchModifier: Int, playerType: PlayerType.Value, hand: Hand.Value,
                       salary: Int, inningsPitched: Option[Int], speed: Option[Int], defense: Option[Int],

@@ -1,4 +1,4 @@
-package baseball
+package game
 
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.{Matchers, WordSpec}
