@@ -1,13 +1,13 @@
 package game
 
-object Field {
+case class Field(defense: Defense, bases: Bases)
 
-  case class Defense(firstBaseman: PlayerCard, secondBaseman: PlayerCard) {
-    require(firstBaseman != null, "A first base man is required")
-  }
-
-  case class Bases(firstBase: Option[PlayerCard], secondBase: Option[PlayerCard], thirdBase: Option[PlayerCard], atBat: PlayerCard) {
-    require(atBat != null, "A batter is required")
-  }
-
+case class Defense(firstBaseman: PlayerCard, secondBaseman: PlayerCard) {
+  require(firstBaseman != null, "A first base man is required")
+  require(secondBaseman != null, "A secondBaseman is required")
 }
+
+case class Bases(firstBase: Option[PlayerCard], secondBase: Option[PlayerCard], thirdBase: Option[PlayerCard], atBat: PlayerCard) {
+  require(atBat != null, "A batter is required")
+}
+
