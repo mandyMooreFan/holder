@@ -1,6 +1,6 @@
 package actions
 
-import java.util.Random
+import scala.util.Random
 
 object RandomNumbers {
 

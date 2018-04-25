@@ -1,12 +1,18 @@
 package game
 
-case class Deck(player: Player, deck: Array[StrategyCard]) {
+import scala.util.Random
 
-  def shuffle(): Array[StrategyCard] = {
-    ???
+case class Deck(player: Player, private var deck: List[StrategyCard]) {
+
+  def shuffle() {
+    deck = Random.shuffle(deck)
   }
 
   def drawCard(): StrategyCard = {
-    ???
+    val top = deck.head
+    deck = deck.tail
+    top
   }
+
+  def size: Int = deck.size
 }
