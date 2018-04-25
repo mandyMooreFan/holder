@@ -12,9 +12,19 @@ class FieldTest extends WordSpec with Matchers with TypeCheckedTripleEquals {
 
     "new" must {
 
-      "have a uuid" in {
+      "have a firstBaseman" in {
         an[IllegalArgumentException] shouldBe thrownBy {
           field.defense.copy(firstBaseman = null)
+        }
+      }
+      "have a SecondBaseman" in {
+        an[IllegalArgumentException] shouldBe thrownBy {
+          field.defense.copy(secondBaseman = null)
+        }
+      }
+      "have a batter" in {
+        an[IllegalArgumentException] shouldBe thrownBy {
+          field.bases.copy(atBat = null)
         }
       }
     }
