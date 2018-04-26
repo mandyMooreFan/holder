@@ -28,6 +28,30 @@ lazy val root = project.in(file("."))
       "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test)
   )
 
+lazy val database = project.in(file("database"))
+  .enablePlugins(JooqCodegen)
+  .settings(
+    libraryDependencies ++= Seq("runtime", "jooq").map { conf =>
+      "mysql" % "mysql-connector-java" % "5.1.16" % conf
+    },
+    jooqVersion := "3.10.1",
+    autoJooqLibrary := true,
+    jooqGroupId := "org.jooq",
+    jooqCodegen := jooqCodegen.dependsOn(flywayMigrate in schema).value,
+    jooqCodegenConfigFile := Some(file("jooq-codegen.xml")),
+    jooqCodegenStrategy := CodegenStrategy.Always
+  )
+
+lazy val schema = project.in(file("database/schema"))
+  .settings(
+    flywayUrl := "jdbc:mysql://localhost:3306",
+    flywayUser := "root",
+    flywayPassword := "test",
+    flywaySchemas := Seq("baseball_card_game"),
+    flywayLocations := Seq("classpath:db/migration"),
+    libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.16" % "runtime"
+  )
+
 lazy val dockerComposeUp = taskKey[Unit]("Run docker image in development")
 
 dockerComposeUp := {
