@@ -128,15 +128,15 @@ workflows:
   build-deploy:
     jobs:
       - build
-      - deploy_environment:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
-      - deploy_application:
-          requires:
-            - deploy_environment
-          filters:
-            branches:
-              only: master
+#      - deploy_environment:
+#          requires:
+#            - build
+#          filters:
+#            branches:
+#              only: master
+#      - deploy_application:
+#          requires:
+#            - deploy_environment
+#          filters:
+#            branches:
+#              only: master
