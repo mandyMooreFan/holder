@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration xmlns="http://www.jooq.org/xsd/jooq-codegen-3.10.0.xsd">
+
+    <!-- JDBC connection parameters -->
+    <jdbc>
+        <driver>com.mysql.jdbc.Driver</driver>
+        <url>jdbc:mysql://localhost:3306</url>
+        <user>root</user>
+        <password>test</password>
+        <!--Test setup-->
+        <!--<url>jdbc:mysql://127.0.0.1:3306/circle_test</url>-->
+        <!--<user>root</user>-->
+        <!--<password></password>-->
+    </jdbc>
+
+    <!-- Generator parameters -->
+    <generator>
+        <database>
+            <name>org.jooq.util.mysql.MySQLDatabase</name>
+            <includes>.*</includes>
+            <schemata>
+                <schema>
+                    <inputSchema>holder</inputSchema>
+                    <outputSchema>holder</outputSchema>
+                </schema>
+            </schemata>
+        </database>
+        <target>
+            <packageName>com.database</packageName>
+            <directory>target/scala-2.12/src_managed/main/java</directory>
+        </target>
+    </generator>
+</configuration>
