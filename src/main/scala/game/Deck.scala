@@ -2,15 +2,15 @@ package game
 
 import scala.util.Random
 
-case class Deck(player: Player, deck: List[StrategyCard]) {
+case class Deck(player: Player, deckList: List[StrategyCard]) {
 
   def shuffle(): Deck = {
-    Deck(player, Random.shuffle(deck))
+    Deck(player, Random.shuffle(deckList))
   }
 
   def drawCard(): (StrategyCard, Deck) = {
-    (deck.head, Deck(player, deck.tail))
+    (deckList.head, Deck(player, deckList.tail))
   }
 
-  def size: Int = deck.size
+  def size: Int = deckList.size
 }
