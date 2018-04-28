@@ -6,7 +6,7 @@ import org.scalatest.{Matchers, WordSpec}
 class PlayerCardTest extends WordSpec with Matchers with TypeCheckedTripleEquals {
 
   "A PlayerCard" when {
-    val playerCard = PlayerCard("123", "Xasz", 8, PlayerType.PITCHER, Hand.LEFT, 1, None, None, None,
+    val playerCard = PlayerCard("123", "Xasz",  "Reds", "2018", 8, PlayerType.PITCHER, Hand.LEFT, 1, None, None, None,
       Array(Position.CATCHER, Position.PITCHER), PlayerChart(None, None, None, None, None, None, None, None, None))
     "new" must {
 
@@ -31,6 +31,30 @@ class PlayerCardTest extends WordSpec with Matchers with TypeCheckedTripleEquals
       "have a non empty name" in {
         an[IllegalArgumentException] shouldBe thrownBy {
           playerCard.copy(name = "")
+        }
+      }
+
+      "have a team" in {
+        an[IllegalArgumentException] shouldBe thrownBy {
+          playerCard.copy(team = null)
+        }
+      }
+
+      "have a non empty team" in {
+        an[IllegalArgumentException] shouldBe thrownBy {
+          playerCard.copy(team = "")
+        }
+      }
+
+      "have a season" in {
+        an[IllegalArgumentException] shouldBe thrownBy {
+          playerCard.copy(season = null)
+        }
+      }
+
+      "have a non empty season" in {
+        an[IllegalArgumentException] shouldBe thrownBy {
+          playerCard.copy(season = "")
         }
       }
 

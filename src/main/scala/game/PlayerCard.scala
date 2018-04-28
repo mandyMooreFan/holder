@@ -1,10 +1,13 @@
 package game
 
-case class PlayerCard(uuid: String, name: String, pitchModifier: Int, playerType: PlayerType.Value, hand: Hand.Value,
-                      salary: Int, inningsPitched: Option[Int], speed: Option[Int], defense: Option[Int],
-                      position: Array[Position.Value], playerChart: PlayerChart) {
+case class PlayerCard(uuid: String, name: String, team: String, season: String, pitchModifier: Int,
+                      playerType: PlayerType.Value, hand: Hand.Value, salary: Int, inningsPitched: Option[Int],
+                      speed: Option[Int], defense: Option[Int], position: Array[Position.Value],
+                      playerChart: PlayerChart) {
   require(uuid != null && uuid.nonEmpty, "Player UUID is required")
   require(name != null && name.nonEmpty, "Player name is required")
+  require(team != null && team.nonEmpty, "Player team is required")
+  require(season != null && season.nonEmpty, "Player season is required")
   require(pitchModifier >= 0, "Player pitchModifier must be greater than or equal to zero")
   require(playerType != null, "Player playerType is required")
   require(hand != null, "Player hand is required")
@@ -23,7 +26,7 @@ object Position extends Enumeration {
 }
 
 object PlayerChartValues extends Enumeration {
-  val OUT_PU, OUT_SO, OUT_GB, OUT_FB, WALK, SINGLE, DOUBLE, TRIPLE, HOMER = Value
+  val OUT_SO, OUT_GB, OUT_FB, WALK, SINGLE, DOUBLE, TRIPLE, HOMER = Value
 }
 
 object Hand extends Enumeration {
