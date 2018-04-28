@@ -1,8 +1,8 @@
 import scala.sys.process._
 
-organization := "com.github.mfoody"
+organization := "com.baseballGame"
 
-name := "akka-boot-starter"
+name := "baseballGame"
 
 version := "0.1"
 
@@ -44,7 +44,7 @@ lazy val database = project.in(file("database"))
 
 lazy val schema = project.in(file("database/schema"))
   .settings(
-    flywayUrl := "jdbc:mysql://localhost:3306",
+    flywayUrl := "jdbc:mysql://localhost:3306/baseball_card_game",
     flywayUser := "root",
     flywayPassword := "test",
     flywaySchemas := Seq("baseball_card_game"),

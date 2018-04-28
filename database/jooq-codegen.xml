@@ -4,7 +4,7 @@
     <!-- JDBC connection parameters -->
     <jdbc>
         <driver>com.mysql.jdbc.Driver</driver>
-        <url>jdbc:mysql://localhost:3306</url>
+        <url>jdbc:mysql://localhost:3306/baseball_card_game</url>
         <user>root</user>
         <password>test</password>
         <!--Test setup-->
@@ -20,13 +20,13 @@
             <includes>.*</includes>
             <schemata>
                 <schema>
-                    <inputSchema>holder</inputSchema>
-                    <outputSchema>holder</outputSchema>
+                    <inputSchema>baseball_card_game</inputSchema>
+                    <outputSchema>baseball_card_game</outputSchema>
                 </schema>
             </schemata>
         </database>
         <target>
-            <packageName>com.database</packageName>
+            <packageName>com.baseballGame.database</packageName>
             <directory>target/scala-2.12/src_managed/main/java</directory>
         </target>
     </generator>
