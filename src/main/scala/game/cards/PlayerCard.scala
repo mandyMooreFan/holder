@@ -1,4 +1,4 @@
-package game
+package game.cards
 
 case class PlayerCard(uuid: String, name: String, team: String, season: String, pitchModifier: Int,
                       playerType: PlayerType.Value, hand: Hand.Value, salary: Int, inningsPitched: Option[Int],
@@ -15,10 +15,6 @@ case class PlayerCard(uuid: String, name: String, team: String, season: String, 
   require(position != null, "Player position is required")
   require(playerChart != null, "Player playerChart is required")
 }
-
-case class PlayerChart(outPu: Option[Range], outSo: Option[Range], outGb: Option[Range], outFb: Option[Range],
-                       walk: Option[Range], single: Option[Range], double: Option[Range], triple: Option[Range],
-                       homer: Option[Range])
 
 object Position extends Enumeration {
   val FIRST_BASE, SECOND_BASE, THIRD_BASE, SHORT_STOP, CATCHER, PITCHER, LEFT_FIELD, CENTER_FIELD, RIGHT_FIELD,

@@ -1,5 +1,6 @@
-package game
+package game.player
 
+import game.cards.{Phase, StrategyCard}
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.{Matchers, WordSpec}
 

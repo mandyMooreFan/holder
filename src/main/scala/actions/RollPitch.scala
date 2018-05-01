@@ -1,6 +1,6 @@
 package actions
 
-import game.PlayerCard
+import game.cards.PlayerCard
 
 case class RollPitch(pitcher: PlayerCard, batter: PlayerCard, diceRoll: Int) {
 

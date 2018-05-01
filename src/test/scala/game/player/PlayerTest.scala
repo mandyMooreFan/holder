@@ -1,4 +1,4 @@
-package game
+package game.player
 
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.{Matchers, WordSpec}

@@ -1,4 +1,6 @@
-package game
+package game.player
+
+import game.cards.StrategyCard
 
 import scala.util.Random
 
