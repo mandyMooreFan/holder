@@ -9,9 +9,7 @@ case class Defense(firstBaseman: PlayerCard, secondBaseman: PlayerCard) {
   require(secondBaseman != null, "A secondBaseman is required")
 }
 
-case class Bases(firstBase: Option[PlayerCard],
-                 secondBase: Option[PlayerCard],
-                 thirdBase: Option[PlayerCard],
+case class Bases(firstBase: Option[PlayerCard], secondBase: Option[PlayerCard], thirdBase: Option[PlayerCard],
                  atBat: Option[PlayerCard]) {
   require(atBat != null, "A batter is required")
 }
