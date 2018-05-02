@@ -1,4 +1,6 @@
-package game
+package game.player
+
+import game.cards.StrategyCard
 
 case class PlayerHand(player: Player, cards: List[StrategyCard]) {
 

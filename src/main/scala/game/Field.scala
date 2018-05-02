@@ -1,5 +1,7 @@
 package game
 
+import game.cards.PlayerCard
+
 case class Field(defense: Defense, bases: Bases)
 
 case class Defense(firstBaseman: PlayerCard, secondBaseman: PlayerCard) {

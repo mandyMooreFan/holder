@@ -1,4 +1,4 @@
-package game
+package game.player
 
 case class Player(uuid: String, name: String, teamName: String) {
   require(uuid != null && uuid.nonEmpty, "Player UUID is required")

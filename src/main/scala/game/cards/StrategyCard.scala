@@ -1,4 +1,4 @@
-package game
+package game.cards
 
 case class StrategyCard(uuid: String, name: String, playPhase: Phase.Value, playText: String) {
   require(uuid != null && uuid.nonEmpty, "StrategyCard UUID is required")
