@@ -9,22 +9,22 @@ case class AdvanceRunners(field: Field) {
     result match {
       case Result.SINGLE =>
         val scoringRunners = List(field.bases.thirdBase).filter(n => n.isDefined)
-        (Field(field.defense, Bases(field.bases.atBat, field.bases.firstBase, field.bases.secondBase, None)),
+        (Field(field.defense, Bases(field.bases.atBat, field.bases.firstBase, field.bases.secondBase, None, None)),
           scoringRunners)
 
       case Result.DOUBLE =>
         val scoringRunners = List(field.bases.secondBase, field.bases.thirdBase).filter(n => n.isDefined)
-        (Field(field.defense, Bases(None, field.bases.atBat, field.bases.firstBase, None)), scoringRunners)
+        (Field(field.defense, Bases(None, field.bases.atBat, field.bases.firstBase, None, None)), scoringRunners)
 
       case Result.TRIPLE =>
         val scoringRunners = List(field.bases.firstBase, field.bases.secondBase, field.bases.thirdBase).filter(n =>
           n.isDefined)
-        (Field(field.defense, Bases(None, None, field.bases.atBat, None)), scoringRunners)
+        (Field(field.defense, Bases(None, None, field.bases.atBat, None, None)), scoringRunners)
 
       case Result.HOMER =>
         val scoringRunners = List(field.bases.atBat, field.bases.firstBase, field.bases.secondBase,
           field.bases.thirdBase).filter(n => n.isDefined)
-        (Field(field.defense, Bases(None, None, None, None)), scoringRunners)
+        (Field(field.defense, Bases(None, None, None, None, None)), scoringRunners)
     }
   }
 }
