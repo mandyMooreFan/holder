@@ -17,6 +17,6 @@ case class Defense(firstBaseman: PlayerCard, secondBaseman: PlayerCard, thirdBas
 }
 
 case class Bases(firstBase: Option[PlayerCard], secondBase: Option[PlayerCard], thirdBase: Option[PlayerCard],
-                 homePlate: Option[Array[PlayerCard]], atBat: Option[PlayerCard]) {
+                 homePlate: List[Option[PlayerCard]], atBat: Option[PlayerCard]) {
   require(atBat != null, "A batter is required")
 }

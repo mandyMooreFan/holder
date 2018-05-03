@@ -1,30 +1,20 @@
 package actions
 
-import game.cards.PlayerCard
 import game.{Bases, Field, Result}
 
 case class AdvanceRunners(field: Field) {
 
-  def handle(result: Result.Value): (Field, List[Option[PlayerCard]]) = {
-    result match {
-      case Result.SINGLE =>
-        val scoringRunners = List(field.bases.thirdBase).filter(n => n.isDefined)
-        (Field(field.defense, Bases(field.bases.atBat, field.bases.firstBase, field.bases.secondBase, None, None)),
-          scoringRunners)
-
-      case Result.DOUBLE =>
-        val scoringRunners = List(field.bases.secondBase, field.bases.thirdBase).filter(n => n.isDefined)
-        (Field(field.defense, Bases(None, field.bases.atBat, field.bases.firstBase, None, None)), scoringRunners)
-
-      case Result.TRIPLE =>
-        val scoringRunners = List(field.bases.firstBase, field.bases.secondBase, field.bases.thirdBase).filter(n =>
-          n.isDefined)
-        (Field(field.defense, Bases(None, None, field.bases.atBat, None, None)), scoringRunners)
-
-      case Result.HOMER =>
-        val scoringRunners = List(field.bases.atBat, field.bases.firstBase, field.bases.secondBase,
-          field.bases.thirdBase).filter(n => n.isDefined)
-        (Field(field.defense, Bases(None, None, None, None, None)), scoringRunners)
+  def handle(result: Result.Value): Field = {
+    val newBases = result match {
+      case Result.SINGLE => Bases(field.bases.atBat, field.bases.firstBase, field.bases.secondBase,
+        List(field.bases.thirdBase), None)
+      case Result.DOUBLE => Bases(None, field.bases.atBat, field.bases.firstBase, List(field.bases.thirdBase,
+        field.bases.secondBase), None)
+      case Result.TRIPLE => Bases(None, None, field.bases.atBat, List(field.bases.thirdBase, field.bases.secondBase,
+        field.bases.firstBase), None)
+      case Result.HOMER => Bases(None, None, None, List(field.bases.thirdBase, field.bases.secondBase,
+        field.bases.firstBase, field.bases.atBat), None)
     }
+    Field(field.defense, newBases)
   }
 }

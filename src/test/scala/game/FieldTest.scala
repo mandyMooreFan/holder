@@ -13,7 +13,7 @@ class FieldTest extends WordSpec with Matchers with TypeCheckedTripleEquals {
       allPostions, PlayerChart(dumbRange, dumbRange, dumbRange, dumbRange, dumbRange, dumbRange, dumbRange, dumbRange))
     val defense = Defense(playerCard1, playerCard1, playerCard1, playerCard1, playerCard1, playerCard1, playerCard1,
       playerCard1)
-    val field = Field(defense, Bases(None, None, None, None,Option(playerCard1)))
+    val field = Field(defense, Bases(None, None, None, List(),Option(playerCard1)))
 
     val pitchCard = PlayerCard("123", "Xasz", "Reds", "2018", 8, PlayerType.PITCHER, Hand.LEFT, 1, None, None, None,
       Array(Position.PITCHER), PlayerChart(dumbRange, dumbRange, dumbRange, dumbRange, dumbRange, dumbRange, dumbRange,
