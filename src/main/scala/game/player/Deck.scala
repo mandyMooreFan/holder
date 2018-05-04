@@ -4,14 +4,14 @@ import game.cards.StrategyCard
 
 import scala.util.Random
 
-case class Deck(player: Player, deckList: List[StrategyCard]) {
+case class Deck(deckList: List[StrategyCard]) {
 
   def shuffle(): Deck = {
-    Deck(player, Random.shuffle(deckList))
+    Deck(Random.shuffle(deckList))
   }
 
   def drawCard(): (StrategyCard, Deck) = {
-    (deckList.head, Deck(player, deckList.tail))
+    (deckList.head, Deck(deckList.tail))
   }
 
   def size: Int = deckList.size
