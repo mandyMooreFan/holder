@@ -1,5 +1,8 @@
 package actions
 
-class EndInning {
+case class EndInning(inning: Double) {
 
+  def handle(): Double = {
+    inning + .5
+  }
 }
